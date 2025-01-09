@@ -1,4 +1,3 @@
-
 # 使用 .NET 8.0 SDK 作为构建镜像
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # 设置构建配置为Release模式
@@ -23,14 +22,19 @@ RUN dotnet publish "Docker.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-
-# 设置容器内用户权限，使其能访问 Docker socket
-# 安装必要的包和工具
-RUN apt-get update \
-    && apt-get install -y \
-        curl \
-        docker.io \
-        docker-compose-plugin \
+# 安装必要的包和设置 Docker
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+        $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -g 999 docker \
     && useradd -r -u 1001 -g docker appuser
@@ -43,6 +47,9 @@ RUN chown -R appuser:docker /app
 
 # 创建 docker-compose 命令的软链接
 RUN ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+
+# 切换到非 root 用户
+USER appuser
 
 # 暴露端口
 EXPOSE 8080

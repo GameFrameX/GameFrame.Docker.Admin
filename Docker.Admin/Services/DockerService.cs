@@ -18,10 +18,10 @@ public sealed class DockerService
     /// </summary>
     public DockerService()
     {
-        _dockerClient = new DockerClientConfiguration(
-                new Uri("unix:///var/run/docker.sock")) // Linux
-            // new Uri("npipe://./pipe/docker_engine")) // Windows
-            .CreateClient();
+        var uri = (Environment.OSVersion.Platform == PlatformID.Win32NT || Environment.OSVersion.Platform == PlatformID.Win32S || Environment.OSVersion.Platform == PlatformID.WinCE || Environment.OSVersion.Platform == PlatformID.Win32Windows)
+                      ? new Uri("npipe://./pipe/docker_engine") // Windows
+                      : new Uri("unix:///var/run/docker.sock"); // Linux
+        _dockerClient = new DockerClientConfiguration(uri).CreateClient();
     }
 
     /// <summary>

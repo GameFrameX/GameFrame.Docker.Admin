@@ -22,15 +22,27 @@ RUN dotnet publish "Docker.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 # 最终阶段：使用运行时镜像
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
+
+# 设置容器内用户权限，使其能访问 Docker socket
+# 安装必要的包和工具
+RUN apt-get update \
+    && apt-get install -y \
+        curl \
+        docker.io \
+        docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -g 999 docker \
+    && useradd -r -u 1001 -g docker appuser
+
 # 从发布阶段复制编译好的文件
 COPY --from=publish /app/publish .
 
-# 设置容器内用户权限，使其能访问 Docker socket
-RUN apt-get update \
-    && apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd -g 999 docker \
-    && usermod -aG docker root
+# 设置目录权限
+RUN chown -R appuser:docker /app
+
+# 创建 docker-compose 命令的软链接
+RUN ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 # 暴露端口
 EXPOSE 8080

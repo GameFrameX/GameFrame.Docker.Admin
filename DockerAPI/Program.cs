@@ -5,10 +5,11 @@ using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 添加服务
+// 所有服务注册必须在 builder.Build() 之前
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<DockerService>();
+builder.Services.AddSingleton<DockerComposeService>();
 
 var app = builder.Build();
 
@@ -49,9 +50,6 @@ app.MapPost("/api/containers/{id}/stop", async (string id, DockerService docker)
 // 获取容器统计信息
 app.MapGet("/api/containers/{id}/stats", async (string id, DockerService docker) =>
     await docker.GetContainerStatsAsync(id));
-
-// 添加服务注册
-builder.Services.AddSingleton<DockerComposeService>();
 
 // 添加 Docker Compose API 端点
 app.MapPost("/api/docker-compose", async (IFormFile file, DockerComposeService dockerCompose) =>

@@ -1,5 +1,8 @@
 namespace Docker.Admin.Models;
 
+/// <summary>
+/// 创建 Docker 容器的请求
+/// </summary>
 public sealed class CreateContainerRequest
 {
     /// <summary>
@@ -13,12 +16,17 @@ public sealed class CreateContainerRequest
     public string Name { get; set; }
 
     /// <summary>
-    /// 环境变量
+    /// 端口映射配置，格式如: "8080:80"
     /// </summary>
-    public Dictionary<string, string> EnvironmentVariables { get; set; }
+    public Dictionary<string, string> Ports { get; set; }
 
     /// <summary>
-    /// 端口映射 (容器端口 -> 主机端口)
+    /// 卷映射配置，格式如: "/host/path:/container/path"
     /// </summary>
-    public Dictionary<string, string> PortBindings { get; set; }
+    public Dictionary<string, string> Volumes { get; set; }
+
+    /// <summary>
+    /// 环境变量配置
+    /// </summary>
+    public Dictionary<string, string> Environments { get; set; }
 }

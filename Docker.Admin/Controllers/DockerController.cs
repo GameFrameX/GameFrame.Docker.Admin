@@ -17,6 +17,7 @@ public class DockerController : ControllerBase
         _dockerService = dockerService;
     }
 
+
     /// <summary>
     /// 获取所有容器列表
     /// </summary>
@@ -220,7 +221,7 @@ public class DockerController : ControllerBase
             return BadRequest("Container name is required");
         }
 
-        await _dockerService.CreateAndStartContainer($"{request.ImageName}:{request.Tag}", request.ContainerName, request.Environments, request.Ports, request.Volumes);
+        await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes);
         return Ok();
     }
 }

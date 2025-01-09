@@ -150,7 +150,15 @@ public sealed class DockerService
     /// </summary>
     /// <param name="imageName">镜像名称</param>
     /// <param name="tag">镜像标签，默认为latest</param>
-    public async Task PullImageAsync(string imageName, string tag = "latest")
+    /// <param name="registry">可选的镜像仓库地址</param>
+    /// <param name="username">可选的用户名，用于身份验证</param>
+    /// <param name="password">可选的密码，用于身份验证</param>
+    /// <remarks>
+    /// 此方法用于从指定的镜像仓库拉取Docker镜像。
+    /// 如果未提供标签，则默认使用"latest"标签。
+    /// 该方法会创建一个新的镜像，并在后台处理进度。
+    /// </remarks>
+    public async Task PullImageAsync(string imageName, string tag = "latest", string registry = "", string username = "", string password = "")
     {
         await _dockerClient.Images.CreateImageAsync(
             new ImagesCreateParameters
@@ -158,7 +166,7 @@ public sealed class DockerService
                 FromImage = imageName,
                 Tag = tag
             },
-            new AuthConfig(),
+            new AuthConfig() { Username = username, Password = password, ServerAddress = registry },
             new Progress<JSONMessage>());
     }
 
@@ -321,14 +329,22 @@ public sealed class DockerService
     /// <summary>
     /// 创建并启动容器
     /// </summary>
-    /// <param name="image"></param>
-    /// <param name="name"></param>
-    /// <param name="environmentVariables"></param>
-    /// <param name="portBindings"></param>
-    /// <param name="volumeBindings"></param>
-    public async Task CreateAndStartContainer(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null)
+    /// <param name="image">要使用的Docker镜像名称</param>
+    /// <param name="tag">镜像标签，默认为latest</param>
+    /// <param name="registry">可选的镜像仓库地址</param>
+    /// <param name="username">可选的用户名，用于身份验证</param>
+    /// <param name="password">可选的密码，用于身份验证</param>
+    /// <param name="name">容器名称</param>
+    /// <param name="environmentVariables">环境变量字典，包含容器启动时需要的环境变量</param>
+    /// <param name="portBindings">端口映射字典，定义容器端口与主机端口的映射关系</param>
+    /// <param name="volumeBindings">卷映射字典，定义主机路径与容器路径的映射关系</param>
+    /// <remarks>
+    /// 此方法首先拉取指定的Docker镜像，然后创建一个新容器并启动它。
+    /// </remarks>
+    public async Task CreateAndStartContainer(string image, string tag, string registry, string username, string password, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null)
     {
-        var containerId = await CreateContainerAsync(image, name, environmentVariables, portBindings, volumeBindings);
+        await PullImageAsync(image, tag, registry, username, password);
+        var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings);
         await StartContainerAsync(containerId);
     }
 }

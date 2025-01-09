@@ -1,11 +1,11 @@
-using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
+
+namespace Docker.Admin.Services;
 
 /// <summary>
 /// Docker Compose服务类，提供Docker Compose相关功能
 /// </summary>
-public class DockerComposeService
+public sealed class DockerComposeService
 {
     /// <summary>
     /// 执行Docker Compose命令
@@ -39,4 +39,4 @@ public class DockerComposeService
             throw new Exception($"Docker Compose failed: {error}");
         }
     }
-} 
+}

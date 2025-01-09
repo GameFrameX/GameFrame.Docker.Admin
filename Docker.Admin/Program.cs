@@ -1,5 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 using System.Reflection;
+using Docker.Admin.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,7 +23,7 @@ builder.Services.AddSwaggerGen(options =>
         Contact = new OpenApiContact
         {
             Name = "AlianBlank",
-            Email = "wangfj11@foxmail.com"
+            Email = "wangfj11@foxmail.com",
         }
     });
 });

@@ -1,4 +1,6 @@
-public class CreateContainerRequest
+namespace Docker.Admin.Models;
+
+public sealed class CreateContainerRequest
 {
     /// <summary>
     /// 镜像名称
@@ -19,4 +21,4 @@ public class CreateContainerRequest
     /// 端口映射 (容器端口 -> 主机端口)
     /// </summary>
     public Dictionary<string, string> PortBindings { get; set; }
-} 
+}

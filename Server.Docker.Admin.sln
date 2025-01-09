@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockerAPI", "DockerAPI\DockerAPI.csproj", "{7AAEF311-D1B4-4192-A0B3-6BA27181F3CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Docker.Admin", "Docker.Admin\Docker.Admin.csproj", "{7AAEF311-D1B4-4192-A0B3-6BA27181F3CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2B5A4E85-5CFD-434C-8158-1ED0364F7FA1}"
 	ProjectSection(SolutionItems) = preProject

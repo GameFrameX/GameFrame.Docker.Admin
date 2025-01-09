@@ -1,9 +1,7 @@
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+
+namespace Docker.Admin.Services;
 
 /// <summary>
 /// Docker服务类，提供Docker容器和镜像管理功能

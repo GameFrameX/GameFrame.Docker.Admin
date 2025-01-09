@@ -1,4 +1,6 @@
 ﻿.idea
-DockerAPI/obj
-DockerAPI/bin
+.vscode
+.DS_Store
 *.user
+**/bin
+**/obj

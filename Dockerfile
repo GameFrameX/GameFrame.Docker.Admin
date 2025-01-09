@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # 复制项目文件并还原依赖
-COPY ["DockerManager.csproj", "./"]
+COPY ["DockerAPI/DockerAPI.csproj", "./"]
 RUN dotnet restore
 
 # 复制所有源代码
@@ -37,7 +37,7 @@ HEALTHCHECK --interval=30s --timeout=3s \
     CMD curl -f http://localhost/health || exit 1
 
 # 设置入口点
-ENTRYPOINT ["dotnet", "DockerManager.dll"]
+ENTRYPOINT ["dotnet", "DockerAPI.dll"]
 
 # 挂载 Docker socket
 VOLUME /var/run/docker.sock 

@@ -26,6 +26,11 @@ public sealed class ContainerCreateAndStartRequest : BaseAuthRequest
     public string ContainerName { get; set; }
 
     /// <summary>
+    /// 是否强制重新创建
+    /// </summary>
+    public bool IsRecreate { get; set; }
+    
+    /// <summary>
     /// 端口映射配置，格式如: "8080:80"
     /// </summary>
     public Dictionary<string, string> Ports { get; set; }

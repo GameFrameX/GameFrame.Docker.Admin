@@ -266,6 +266,29 @@ public class ContainersController : ControllerBase
     {
         try
         {
+            if (request.IsRecreate)
+            {
+                var containers = await _dockerService.GetContainersAsync();
+                bool isFind = false;
+                foreach (var container in containers)
+                {
+                    foreach (var containerName in container.Names)
+                    {
+                        if (containerName.Substring(1).Equals(request.ContainerName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            await _dockerService.RemoveContainerAsync(container.ID, true);
+                            isFind = true;
+                            break;
+                        }
+                    }
+
+                    if (isFind)
+                    {
+                        break;
+                    }
+                }
+            }
+
             await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes);
             return Ok();
         }

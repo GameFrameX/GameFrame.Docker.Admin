@@ -1,3 +1,8 @@
+# 使用 .NET 8.0 运行时作为基础镜像
+FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+USER $APP_UID
+WORKDIR /app
+
 # 使用 .NET 8.0 SDK 作为构建镜像
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # 设置构建配置为Release模式
@@ -19,32 +24,17 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Docker.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # 最终阶段：使用运行时镜像
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM base AS final
 WORKDIR /app
-
-# 安装必要的包和 Docker Compose
-RUN apt-get update && apt-get upgrade -y \
-    && apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    software-properties-common \
-    && apt-get update \
-    && apt-get install -y \
-    docker.io \
-    docker-compose \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd -g 999 docker \
-    && useradd -r -u 1001 -g docker appuser
-
 # 从发布阶段复制编译好的文件
 COPY --from=publish /app/publish .
 
-# 设置目录权限
-RUN chown -R appuser:docker /app
-
-# 切换到非 root 用户
-USER appuser
+# 设置容器内用户权限，使其能访问 Docker socket
+RUN apt-get update \
+    && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -g 999 docker \
+    && usermod -aG docker root
 
 # 暴露端口
 EXPOSE 8080

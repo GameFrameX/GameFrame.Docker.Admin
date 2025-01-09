@@ -16,27 +16,34 @@ public sealed class DockerComposeService
     public async Task ExecuteDockerComposeAsync(string yamlFilePath)
     {
         // 配置进程启动信息
-        var processStartInfo = new ProcessStartInfo
+        var process = new Process
         {
-            FileName = "docker-compose",
-            Arguments = $"-f {yamlFilePath} up -d", // 使用指定的yaml文件启动容器，-d表示后台运行
-            RedirectStandardOutput = true, // 重定向标准输出
-            RedirectStandardError = true,  // 重定向标准错误
-            UseShellExecute = false,       // 不使用shell执行
-            CreateNoWindow = true          // 不创建窗口
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "docker-compose",
+                Arguments = $"-f {yamlFilePath} up -d",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
         };
 
-        // 创建并启动进程
-        using var process = new Process { StartInfo = processStartInfo };
-        process.Start();
-        string output = await process.StandardOutput.ReadToEndAsync();
-        string error = await process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
-
-        // 检查执行结果
-        if (process.ExitCode != 0)
+        try
         {
-            throw new Exception($"Docker Compose failed: {error}");
+            process.Start();
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            if (process.ExitCode != 0)
+            {
+                throw new Exception($"Docker compose failed with exit code {process.ExitCode}. Error: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to execute docker-compose command. Error: {ex.Message}", ex);
         }
     }
 }

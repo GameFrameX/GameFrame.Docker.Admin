@@ -1,7 +1,3 @@
-# 使用 .NET 8.0 运行时作为基础镜像
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
-USER $APP_UID
-WORKDIR /app
 
 # 使用 .NET 8.0 SDK 作为构建镜像
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -24,7 +20,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Docker.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # 最终阶段：使用运行时镜像
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 # 从发布阶段复制编译好的文件
 COPY --from=publish /app/publish .

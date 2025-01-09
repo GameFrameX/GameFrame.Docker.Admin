@@ -184,9 +184,19 @@ public sealed class DockerService
     /// <param name="name">容器名称</param>
     /// <param name="environmentVariables">环境变量字典</param>
     /// <param name="portBindings">端口映射字典</param>
+    /// <param name="volumeBindings">卷映射字典</param>
     /// <returns>创建的容器ID</returns>
-    public async Task<string> CreateContainerAsync(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null)
+    public async Task<string> CreateContainerAsync(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null)
     {
+        var volumeList = new List<string>();
+        if (volumeBindings != null)
+        {
+            foreach (var volumeBinding in volumeBindings)
+            {
+                volumeList.Add($"{volumeBinding.Key}:{volumeBinding.Value}");
+            }
+        }
+
         var response = await _dockerClient.Containers.CreateContainerAsync(
                            new CreateContainerParameters
                            {
@@ -200,8 +210,8 @@ public sealed class DockerService
                                        kv => (IList<PortBinding>)new List<PortBinding>
                                        {
                                            new PortBinding { HostPort = kv.Value }
-                                       })
-                                   ,
+                                       }),
+                                   Binds = volumeList,
                                },
                            });
 
@@ -315,9 +325,10 @@ public sealed class DockerService
     /// <param name="name"></param>
     /// <param name="environmentVariables"></param>
     /// <param name="portBindings"></param>
-    public async Task CreateAndStartContainer(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null)
+    /// <param name="volumeBindings"></param>
+    public async Task CreateAndStartContainer(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null)
     {
-        var containerId = await CreateContainerAsync(image, name, environmentVariables, portBindings);
+        var containerId = await CreateContainerAsync(image, name, environmentVariables, portBindings, volumeBindings);
         await StartContainerAsync(containerId);
     }
 }

@@ -220,7 +220,7 @@ public class DockerController : ControllerBase
             return BadRequest("Container name is required");
         }
 
-        await _dockerService.CreateAndStartContainer($"{request.ImageName}:{request.Tag}", request.ContainerName, request.Environments, request.Ports);
+        await _dockerService.CreateAndStartContainer($"{request.ImageName}:{request.Tag}", request.ContainerName, request.Environments, request.Ports, request.Volumes);
         return Ok();
     }
 }

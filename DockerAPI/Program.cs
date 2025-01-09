@@ -1,72 +1,45 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.OpenApi.Models;
+using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 所有服务注册必须在 builder.Build() 之前
+// 添加 MVC 服务
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Docker Manager API",
+        Description = "一个用于管理Docker容器的ASP.NET Core Web API",
+        Contact = new OpenApiContact
+        {
+            Name = "AlianBlank",
+            Email = "wangfj11@foxmail.com"
+        }
+    });
+});
+
 builder.Services.AddSingleton<DockerService>();
 builder.Services.AddSingleton<DockerComposeService>();
 
 var app = builder.Build();
 
-// 配置 Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// API 端点
-// 获取容器列表
-app.MapGet("/api/containers", async (DockerService docker) =>
-    await docker.GetContainersAsync());
-
-// 获取镜像列表
-app.MapGet("/api/images", async (DockerService docker) =>
-    await docker.GetImagesAsync());
-
-// 获取容器日志
-app.MapGet("/api/containers/{id}/logs", async (string id, DockerService docker) =>
-    await docker.GetContainerLogsAsync(id));
-
-// 启动容器
-app.MapPost("/api/containers/{id}/start", async (string id, DockerService docker) =>
-{
-    await docker.StartContainerAsync(id);
-    return Results.Ok();
-});
-
-// 停止容器
-app.MapPost("/api/containers/{id}/stop", async (string id, DockerService docker) =>
-{
-    await docker.StopContainerAsync(id);
-    return Results.Ok();
-});
-
-// 获取容器统计信息
-app.MapGet("/api/containers/{id}/stats", async (string id, DockerService docker) =>
-    await docker.GetContainerStatsAsync(id));
-
-// 添加 Docker Compose API 端点
-app.MapPost("/api/docker-compose", async (IFormFile file, DockerComposeService dockerCompose) =>
-{
-    if (file == null || file.Length == 0)
-        return Results.BadRequest("No file uploaded");
-
-    var filePath = Path.GetTempFileName();
-    using (var stream = new FileStream(filePath, FileMode.Create))
-    {
-        await file.CopyToAsync(stream);
-    }
-
-    await dockerCompose.ExecuteDockerComposeAsync(filePath);
-    File.Delete(filePath);
-    
-    return Results.Ok();
-});
+// 添加路由中间件
+app.UseRouting();
+app.MapControllers();
 
 app.Run();

@@ -7,10 +7,13 @@
         <Nullable>disable</Nullable>
         <LangVersion>10</LangVersion>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
         <PackageReference Include="Docker.DotNet" Version="3.125.15" />
         <PackageReference Include="Docker.DotNet.X509" Version="3.125.15" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     </ItemGroup>
 </Project>

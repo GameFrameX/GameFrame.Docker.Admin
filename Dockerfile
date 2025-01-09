@@ -23,8 +23,14 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 # 安装必要的包和 Docker Compose
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
     curl \
+    software-properties-common \
+    && apt-get update \
+    && apt-get install -y \
     docker.io \
     docker-compose \
     && rm -rf /var/lib/apt/lists/* \

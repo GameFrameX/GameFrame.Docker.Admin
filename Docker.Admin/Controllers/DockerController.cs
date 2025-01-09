@@ -201,4 +201,26 @@ public class DockerController : ControllerBase
         await _dockerService.UnpauseContainerAsync(id);
         return Ok();
     }
+
+    /// <summary>
+    /// 根据镜像名称和标签创建并执行Docker Compose文件
+    /// </summary>
+    /// <param name="request">Docker Compose 配置请求</param>
+    /// <returns>执行结果</returns>
+    [HttpPost("containers/create")]
+    public async Task<IActionResult> CreateAndExecuteDockerCompose(DockerComposeRequest request)
+    {
+        if (string.IsNullOrEmpty(request.ImageName) || string.IsNullOrEmpty(request.Tag))
+        {
+            return BadRequest("Image name and tag are required");
+        }
+
+        if (string.IsNullOrEmpty(request.ContainerName))
+        {
+            return BadRequest("Container name is required");
+        }
+
+        await _dockerService.CreateAndStartContainer($"{request.ImageName}:{request.Tag}", request.ContainerName, request.Environments, request.Ports);
+        return Ok();
+    }
 }

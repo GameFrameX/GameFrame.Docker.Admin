@@ -23,15 +23,15 @@ public sealed class DockerComposeRequest
     /// <summary>
     /// 端口映射配置，格式如: "8080:80"
     /// </summary>
-    public string[] PortMappings { get; set; }
+    public Dictionary<string, string> Ports { get; set; }
 
     /// <summary>
     /// 卷映射配置，格式如: "/host/path:/container/path"
     /// </summary>
-    public string[] VolumeMappings { get; set; }
+    public Dictionary<string, string> Volumes { get; set; }
 
     /// <summary>
     /// 环境变量配置
     /// </summary>
-    public Dictionary<string, string> EnvironmentVariables { get; set; }
+    public Dictionary<string, string> Environments { get; set; }
 }

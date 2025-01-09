@@ -201,7 +201,8 @@ public sealed class DockerService
                                        {
                                            new PortBinding { HostPort = kv.Value }
                                        })
-                               }
+                                   ,
+                               },
                            });
 
         return response.ID;
@@ -305,5 +306,18 @@ public sealed class DockerService
     public async Task UnpauseContainerAsync(string containerId)
     {
         await _dockerClient.Containers.UnpauseContainerAsync(containerId);
+    }
+
+    /// <summary>
+    /// 创建并启动容器
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="name"></param>
+    /// <param name="environmentVariables"></param>
+    /// <param name="portBindings"></param>
+    public async Task CreateAndStartContainer(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null)
+    {
+        var containerId = await CreateContainerAsync(image, name, environmentVariables, portBindings);
+        await StartContainerAsync(containerId);
     }
 }

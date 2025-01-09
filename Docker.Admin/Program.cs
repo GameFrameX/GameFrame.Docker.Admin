@@ -29,7 +29,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddSingleton<DockerService>();
-builder.Services.AddSingleton<DockerComposeService>();
 
 var app = builder.Build();
 

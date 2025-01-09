@@ -22,20 +22,11 @@ RUN dotnet publish "Docker.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# 安装必要的包和设置 Docker
+# 安装必要的包和 Docker Compose
 RUN apt-get update && apt-get install -y \
     curl \
-    ca-certificates \
-    gnupg \
-    && install -m 0755 -d /etc/apt/keyrings \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
-    && chmod a+r /etc/apt/keyrings/docker.gpg \
-    && echo \
-        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-        tee /etc/apt/sources.list.d/docker.list > /dev/null \
-    && apt-get update \
-    && apt-get install -y docker-ce-cli docker-compose-plugin \
+    docker.io \
+    docker-compose \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -g 999 docker \
     && useradd -r -u 1001 -g docker appuser

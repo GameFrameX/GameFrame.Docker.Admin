@@ -1,6 +1,7 @@
 using Docker.Admin.Models;
 using Docker.Admin.Models.Image;
 using Docker.Admin.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Docker.Admin.Controllers;
@@ -30,8 +31,15 @@ public class ImageController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetList()
     {
-        var images = await _dockerService.GetImagesAsync();
-        return Ok(images);
+        try
+        {
+            var images = await _dockerService.GetImagesAsync();
+            return Ok(images);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving image list: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -42,8 +50,15 @@ public class ImageController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Pull([FromBody] PullImageRequest request)
     {
-        await _dockerService.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
-        return Ok();
+        try
+        {
+            await _dockerService.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error pulling image: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -54,7 +69,14 @@ public class ImageController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Remove([FromBody] BaseDeleteRequest request)
     {
-        await _dockerService.RemoveImageAsync(request.Id, request.IsForce);
-        return Ok();
+        try
+        {
+            await _dockerService.RemoveImageAsync(request.Id, request.IsForce);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error removing image: {ex.Message}");
+        }
     }
 }

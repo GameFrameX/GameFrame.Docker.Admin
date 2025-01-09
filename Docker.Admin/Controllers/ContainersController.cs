@@ -34,8 +34,15 @@ public class ContainersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetList()
     {
-        var containers = await _dockerService.GetContainersAsync();
-        return Ok(containers);
+        try
+        {
+            var containers = await _dockerService.GetContainersAsync();
+            return Ok(containers);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving container list: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -52,8 +59,15 @@ public class ContainersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetLogs([FromBody] BaseRequest request)
     {
-        var logs = await _dockerService.GetContainerLogsAsync(request.Id);
-        return Ok(logs);
+        try
+        {
+            var logs = await _dockerService.GetContainerLogsAsync(request.Id);
+            return Ok(logs);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving logs for container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -63,8 +77,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Start([FromBody] BaseRequest request)
     {
-        await _dockerService.StartContainerAsync(request.Id);
-        return Ok();
+        try
+        {
+            await _dockerService.StartContainerAsync(request.Id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error starting container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -74,8 +95,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Stop([FromBody] BaseRequest request)
     {
-        await _dockerService.StopContainerAsync(request.Id);
-        return Ok();
+        try
+        {
+            await _dockerService.StopContainerAsync(request.Id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error stopping container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -86,8 +114,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> GetStats([FromBody] BaseRequest request)
     {
-        var stats = await _dockerService.GetContainerStatsAsync(request.Id);
-        return Ok(stats);
+        try
+        {
+            var stats = await _dockerService.GetContainerStatsAsync(request.Id);
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving stats for container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -97,8 +132,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Restart([FromBody] BaseRequest request)
     {
-        await _dockerService.RestartContainerAsync(request.Id);
-        return Ok();
+        try
+        {
+            await _dockerService.RestartContainerAsync(request.Id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error restarting container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -108,8 +150,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Remove([FromBody] BaseDeleteRequest request)
     {
-        await _dockerService.RemoveContainerAsync(request.Id, request.IsForce);
-        return Ok();
+        try
+        {
+            await _dockerService.RemoveContainerAsync(request.Id, request.IsForce);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error removing container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -119,13 +168,20 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateContainerRequest request)
     {
-        var containerId = await _dockerService.CreateContainerAsync(
-                              request.Image,
-                              request.Name,
-                              request.Environments,
-                              request.Ports,
-                              request.Volumes);
-        return Ok(new { ContainerId = containerId });
+        try
+        {
+            var containerId = await _dockerService.CreateContainerAsync(
+                                  request.Image,
+                                  request.Name,
+                                  request.Environments,
+                                  request.Ports,
+                                  request.Volumes);
+            return Ok(new { ContainerId = containerId });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating container: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -135,8 +191,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Inspect([FromBody] BaseRequest request)
     {
-        var info = await _dockerService.InspectContainerAsync(request.Id);
-        return Ok(info);
+        try
+        {
+            var info = await _dockerService.InspectContainerAsync(request.Id);
+            return Ok(info);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error inspecting container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -146,8 +209,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Rename([FromBody] RenameContainerRequest request)
     {
-        await _dockerService.RenameContainerAsync(request.Id, request.Name);
-        return Ok();
+        try
+        {
+            await _dockerService.RenameContainerAsync(request.Id, request.Name);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error renaming container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -157,8 +227,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Pause([FromBody] BaseRequest request)
     {
-        await _dockerService.PauseContainerAsync(request.Id);
-        return Ok();
+        try
+        {
+            await _dockerService.PauseContainerAsync(request.Id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error pausing container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -168,8 +245,15 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Unpause([FromBody] BaseRequest request)
     {
-        await _dockerService.UnpauseContainerAsync(request.Id);
-        return Ok();
+        try
+        {
+            await _dockerService.UnpauseContainerAsync(request.Id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error unpausing container {request.Id}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -180,7 +264,14 @@ public class ContainersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAndStart([FromBody] ContainerCreateAndStartRequest request)
     {
-        await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes);
-        return Ok();
+        try
+        {
+            await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating and starting container: {ex.Message}");
+        }
     }
 }

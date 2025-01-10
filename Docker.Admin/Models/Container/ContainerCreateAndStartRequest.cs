@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Docker.Admin.Models;
+namespace Docker.Admin.Models.Container;
 
 /// <summary>
 /// 创建并启动 Docker 容器的请求

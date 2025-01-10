@@ -1,4 +1,4 @@
-namespace Docker.Admin.Models;
+namespace Docker.Admin.Models.Container;
 
 /// <summary>
 /// 创建 Docker 容器的请求

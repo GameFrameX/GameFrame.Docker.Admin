@@ -1,4 +1,4 @@
-namespace Docker.Admin.Models;
+namespace Docker.Admin.Models.Container;
 
 /// <summary>
 /// 重命名容器请求

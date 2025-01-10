@@ -8,7 +8,7 @@ namespace Docker.Admin.Models;
 public class BaseRequest
 {
     /// <summary>
-    /// 镜像ID 或容器ID
+    /// 镜像ID 或容器ID 或网络ID
     /// </summary>
     [Required]
     public string Id { get; set; }

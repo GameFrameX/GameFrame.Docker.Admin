@@ -300,13 +300,14 @@ public sealed partial class DockerService
     /// <param name="environmentVariables">环境变量字典，包含容器启动时需要的环境变量</param>
     /// <param name="portBindings">端口映射字典，定义容器端口与主机端口的映射关系</param>
     /// <param name="volumeBindings">卷映射字典，定义主机路径与容器路径的映射关系</param>
+    /// <param name="networkConfig">可选的网络配置</param>
     /// <remarks>
     /// 此方法首先拉取指定的Docker镜像，然后创建一个新容器并启动它。
     /// </remarks>
-    public async Task CreateAndStartContainer(string image, string tag, string registry, string username, string password, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null)
+    public async Task CreateAndStartContainer(string image, string tag, string registry, string username, string password, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, CreateNetworkRequest networkConfig = null)
     {
         await PullImageAsync(image, tag, registry, username, password);
-        var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings);
+        var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig);
         await StartContainerAsync(containerId);
     }
 }

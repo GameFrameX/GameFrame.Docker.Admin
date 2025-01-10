@@ -1,5 +1,6 @@
 using Docker.Admin.Models;
 using Docker.Admin.Models.Container;
+using Docker.Admin.Models.Network;
 using Docker.Admin.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -290,7 +291,15 @@ public class ContainersController : ControllerBase
                 }
             }
 
-            await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes);
+            CreateNetworkRequest createNetworkRequest = new CreateNetworkRequest()
+            {
+                Name = request.NetworkName,
+                Subnet = request.NetworkSubnet,
+                IpAddress = request.NetworkIpAddress,
+                IsRecreate = request.IsRecreate,
+            };
+
+            await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes, createNetworkRequest);
             return Ok();
         }
         catch (Exception ex)

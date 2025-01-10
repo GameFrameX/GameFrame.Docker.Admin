@@ -173,23 +173,14 @@ public sealed partial class DockerService
             parameters.HostConfig = new HostConfig();
             parameters.HostConfig.PortBindings = new Dictionary<string, IList<PortBinding>>();
 
-            foreach (var portBinding in portBindings)
-            {
-                // 确保端口映射的格式正确
-                if (!parameters.HostConfig.PortBindings.ContainsKey(portBinding.Key))
-                {
-                    parameters.HostConfig.PortBindings[portBinding.Key] = new List<PortBinding>();
-                }
-
-                parameters.HostConfig.PortBindings[portBinding.Key].Add(new PortBinding { HostPort = portBinding.Value });
-            }
-
-            // 暴露端口
+            // 暴露且绑定端口
             parameters.ExposedPorts = new Dictionary<string, EmptyStruct>();
 
             foreach (var portBinding in portBindings)
             {
-                parameters.ExposedPorts[portBinding.Key] = default;
+                // 绑定端口
+                parameters.HostConfig.PortBindings[portBinding.Value] = new List<PortBinding> { new PortBinding { HostPort = portBinding.Key } };
+                parameters.ExposedPorts[portBinding.Value] = default;
             }
         }
 

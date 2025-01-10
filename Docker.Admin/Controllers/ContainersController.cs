@@ -296,7 +296,7 @@ public class ContainersController : ControllerBase
                 Name = request.NetworkName,
                 Subnet = request.NetworkSubnet,
                 IpAddress = request.NetworkIpAddress,
-                IsRecreate = request.IsRecreate,
+                IsRecreate = request.NetworkIsRecreate,
             };
 
             await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes, createNetworkRequest);

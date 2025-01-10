@@ -46,6 +46,11 @@ public sealed class ContainerCreateAndStartRequest : BaseAuthRequest
     public string NetworkIpAddress { get; set; }
 
     /// <summary>
+    /// 是否强制重新创建网络
+    /// </summary>
+    public bool NetworkIsRecreate { get; set; }
+
+    /// <summary>
     /// 端口映射配置，格式如: "8080:80"
     /// </summary>
     public Dictionary<string, string> Ports { get; set; }

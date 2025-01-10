@@ -61,6 +61,11 @@ public sealed partial class DockerService
     /// <param name="networkConfig">网络配置，包括名称、子网等信息</param>
     public async Task CreateNetwork(CreateNetworkRequest networkConfig)
     {
+        if (networkConfig == null)
+        {
+            return;
+        }
+
         var networks = await _dockerClient.Networks.ListNetworksAsync();
         bool isFind = false; // 标记是否找到同名网络
         foreach (var network in networks)

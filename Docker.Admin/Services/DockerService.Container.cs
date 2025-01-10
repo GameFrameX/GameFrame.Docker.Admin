@@ -170,16 +170,18 @@ public sealed partial class DockerService
         // 端口
         if (portBindings != null)
         {
-            parameters.HostConfig = new HostConfig
+            parameters.HostConfig = new HostConfig();
+            parameters.HostConfig.PortBindings = new Dictionary<string, IList<PortBinding>>();
+
+            foreach (var portBinding in portBindings)
             {
-                PortBindings = portBindings?.ToDictionary(
-                    kv => kv.Key,
-                    kv => (IList<PortBinding>)new List<PortBinding>
-                    {
-                        new PortBinding { HostPort = kv.Value }
-                    }),
-                Binds = volumeList,
-            };
+                parameters.HostConfig.PortBindings.Add(portBinding.Key, new List<PortBinding> { new PortBinding { HostPort = portBinding.Value, HostIP = "0.0.0.0", }, });
+            }
+        }
+
+        if (volumeList.Count > 0)
+        {
+            parameters.HostConfig.Binds = volumeList;
         }
 
 

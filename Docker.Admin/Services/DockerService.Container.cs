@@ -181,7 +181,7 @@ public sealed partial class DockerService
                     parameters.HostConfig.PortBindings[portBinding.Key] = new List<PortBinding>();
                 }
 
-                parameters.HostConfig.PortBindings[portBinding.Key].Add(new PortBinding { HostPort = portBinding.Value, HostIP = "0.0.0.0", });
+                parameters.HostConfig.PortBindings[portBinding.Key].Add(new PortBinding { HostPort = portBinding.Value });
             }
 
             // 暴露端口

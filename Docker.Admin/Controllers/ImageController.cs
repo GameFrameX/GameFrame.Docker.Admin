@@ -1,6 +1,8 @@
 using Docker.Admin.Models;
 using Docker.Admin.Models.Image;
 using Docker.Admin.Services;
+using Docker.DotNet.Models;
+using GameFrameX.Foundation.Http.Normalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +13,7 @@ namespace Docker.Admin.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]/[action]")]
+[Produces("application/json")]
 public class ImageController : ControllerBase
 {
     private readonly DockerService _dockerService;
@@ -29,16 +32,18 @@ public class ImageController : ControllerBase
     /// </summary>
     /// <returns>返回所有镜像的列表</returns>
     [HttpGet]
-    public async Task<IActionResult> GetList()
+    [ProducesResponseType(typeof(List<ImagesListResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<string> GetList()
     {
         try
         {
             var images = await _dockerService.GetImagesAsync();
-            return Ok(images);
+            return HttpJsonResult.SuccessString(images);
         }
         catch (Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving image list: {ex.Message}");
+            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving image list: {ex.Message}");
         }
     }
 
@@ -48,16 +53,18 @@ public class ImageController : ControllerBase
     /// <param name="request">拉取镜像请求参数，包括镜像名称、标签、仓库地址、用户名和密码</param>
     /// <returns>返回操作结果</returns>
     [HttpPost]
-    public async Task<IActionResult> Pull([FromBody] PullImageRequest request)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<string> Pull([FromBody] PullImageRequest request)
     {
         try
         {
             await _dockerService.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
-            return Ok();
+            return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, $"Error pulling image: {ex.Message}");
+            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error pulling image: {ex.Message}");
         }
     }
 
@@ -67,16 +74,18 @@ public class ImageController : ControllerBase
     /// <param name="request">删除镜像请求参数，包括镜像ID和是否强制删除的标志</param>
     /// <returns>返回操作结果</returns>
     [HttpPost]
-    public async Task<IActionResult> Remove([FromBody] BaseDeleteRequest request)
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<string> Remove([FromBody] BaseDeleteRequest request)
     {
         try
         {
             await _dockerService.RemoveImageAsync(request.Id, request.IsForce);
-            return Ok();
+            return HttpJsonResult.SuccessString(request.Id);
         }
         catch (Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, $"Error removing image: {ex.Message}");
+            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing image: {ex.Message}");
         }
     }
 }

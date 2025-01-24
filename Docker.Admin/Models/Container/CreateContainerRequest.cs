@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Docker.Admin.Models.Container;
 
 /// <summary>
@@ -8,11 +10,13 @@ public sealed class CreateContainerRequest
     /// <summary>
     /// 镜像名称
     /// </summary>
+    [Required]
     public string Image { get; set; }
 
     /// <summary>
     /// 容器名称
     /// </summary>
+    [Required]
     public string Name { get; set; }
 
     /// <summary>

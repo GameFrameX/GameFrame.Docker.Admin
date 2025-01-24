@@ -11,6 +11,7 @@
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="GameFrameX.Foundation.Http.Normalization" Version="1.0.4" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
         <PackageReference Include="Docker.DotNet" Version="3.125.15" />
         <PackageReference Include="Docker.DotNet.X509" Version="3.125.15" />

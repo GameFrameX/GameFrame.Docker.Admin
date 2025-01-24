@@ -311,10 +311,11 @@ public sealed partial class DockerService
     /// <remarks>
     /// 此方法首先拉取指定的Docker镜像，然后创建一个新容器并启动它。
     /// </remarks>
-    public async Task CreateAndStartContainer(string image, string tag, string registry, string username, string password, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, CreateNetworkRequest networkConfig = null)
+    public async Task<string> CreateAndStartContainer(string image, string tag, string registry, string username, string password, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, CreateNetworkRequest networkConfig = null)
     {
         await PullImageAsync(image, tag, registry, username, password);
         var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig);
         await StartContainerAsync(containerId);
+        return containerId;
     }
 }

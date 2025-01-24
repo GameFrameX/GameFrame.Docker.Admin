@@ -1,4 +1,7 @@
 // 定义请求类以删除网络
+
+using System.ComponentModel.DataAnnotations;
+
 namespace Docker.Admin.Models.Network;
 
 /// <summary>
@@ -9,5 +12,6 @@ public sealed class DeleteNetworkRequest
     /// <summary>
     /// 获取或设置要删除的网络名称
     /// </summary>
+    [Required]
     public string Name { get; set; }
 }

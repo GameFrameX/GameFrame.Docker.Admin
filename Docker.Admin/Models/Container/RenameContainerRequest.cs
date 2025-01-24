@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Docker.Admin.Models.Container;
 
 /// <summary>
@@ -8,5 +10,6 @@ public sealed class RenameContainerRequest : BaseRequest
     /// <summary>
     /// 容器名称
     /// </summary>
+    [Required]
     public string Name { get; set; }
 }

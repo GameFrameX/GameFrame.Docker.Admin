@@ -34,17 +34,17 @@ public class NetWorkController : BaseController
     [HttpGet]
     [ProducesResponseType(typeof(List<NetworkResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> GetList()
+    public async Task<HttpJsonResult> GetList()
     {
         try
         {
             var networks = await Service.GetNetworks();
-            return HttpJsonResult.SuccessString(networks);
+            return HttpJsonResult.Success(networks);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving network list: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error retrieving network list: {ex.Message}");
         }
     }
 
@@ -56,17 +56,17 @@ public class NetWorkController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(NetworkResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Get([FromBody] GetNetworkRequest request)
+    public async Task<HttpJsonResult> Get([FromBody] GetNetworkRequest request)
     {
         try
         {
             var network = await Service.GetNetwork(request.Name);
-            return HttpJsonResult.SuccessString(network);
+            return HttpJsonResult.Success(network);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving network information: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error retrieving network information: {ex.Message}");
         }
     }
 
@@ -78,17 +78,17 @@ public class NetWorkController : BaseController
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Create([FromBody] CreateNetworkRequest request)
+    public async Task<HttpJsonResult> Create([FromBody] CreateNetworkRequest request)
     {
         try
         {
             await Service.CreateNetwork(request);
-            return HttpJsonResult.SuccessString();
+            return HttpJsonResult.Success();
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error creating network: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error creating network: {ex.Message}");
         }
     }
 
@@ -100,17 +100,17 @@ public class NetWorkController : BaseController
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Remove([FromBody] DeleteNetworkRequest request)
+    public async Task<HttpJsonResult> Remove([FromBody] DeleteNetworkRequest request)
     {
         try
         {
             await Service.DeleteNetwork(request);
-            return HttpJsonResult.SuccessString();
+            return HttpJsonResult.Success();
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing network: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error removing network: {ex.Message}");
         }
     }
 }

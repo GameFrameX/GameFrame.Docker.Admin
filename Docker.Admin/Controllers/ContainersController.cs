@@ -37,17 +37,17 @@ public class ContainersController : BaseController
     [HttpGet]
     [ProducesResponseType(typeof(List<ContainerListResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> GetList()
+    public async Task<HttpJsonResult> GetList()
     {
         try
         {
             var containers = await Service.GetContainersAsync();
-            return HttpJsonResult.SuccessString(containers);
+            return HttpJsonResult.Success(containers);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving container list: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error retrieving container list: {ex.Message}");
         }
     }
 
@@ -63,17 +63,17 @@ public class ContainersController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> GetLogs([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> GetLogs([FromBody] BaseRequest request)
     {
         try
         {
             var logs = await Service.GetContainerLogsAsync(request.Id);
-            return HttpJsonResult.SuccessString(logs);
+            return HttpJsonResult.Success(logs);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving logs for container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error retrieving logs for container {request.Id}: {ex.Message}");
         }
     }
 
@@ -84,17 +84,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Start([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> Start([FromBody] BaseRequest request)
     {
         try
         {
             await Service.StartContainerAsync(request.Id);
-            return HttpJsonResult.SuccessString(request.Id);
+            return HttpJsonResult.Success(request.Id);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error starting container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error starting container {request.Id}: {ex.Message}");
         }
     }
 
@@ -105,17 +105,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Stop([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> Stop([FromBody] BaseRequest request)
     {
         try
         {
             await Service.StopContainerAsync(request.Id);
-            return HttpJsonResult.SuccessString(request.Id);
+            return HttpJsonResult.Success(request.Id);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error stopping container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error stopping container {request.Id}: {ex.Message}");
         }
     }
 
@@ -127,17 +127,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(ContainerStatsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> GetStats([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> GetStats([FromBody] BaseRequest request)
     {
         try
         {
             var stats = await Service.GetContainerStatsAsync(request.Id);
-            return HttpJsonResult.SuccessString(stats);
+            return HttpJsonResult.Success(stats);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving stats for container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error retrieving stats for container {request.Id}: {ex.Message}");
         }
     }
 
@@ -148,17 +148,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Restart([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> Restart([FromBody] BaseRequest request)
     {
         try
         {
             await Service.RestartContainerAsync(request.Id);
-            return HttpJsonResult.SuccessString();
+            return HttpJsonResult.Success();
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error restarting container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error restarting container {request.Id}: {ex.Message}");
         }
     }
 
@@ -169,17 +169,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Remove([FromBody] BaseDeleteRequest request)
+    public async Task<HttpJsonResult> Remove([FromBody] BaseDeleteRequest request)
     {
         try
         {
             await Service.RemoveContainerAsync(request.Id, request.IsForce);
-            return HttpJsonResult.SuccessString();
+            return HttpJsonResult.Success();
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error removing container {request.Id}: {ex.Message}");
         }
     }
 
@@ -190,7 +190,7 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Create([FromBody] CreateContainerRequest request)
+    public async Task<HttpJsonResult> Create([FromBody] CreateContainerRequest request)
     {
         try
         {
@@ -200,12 +200,12 @@ public class ContainersController : BaseController
                                   request.Environments,
                                   request.Ports,
                                   request.Volumes);
-            return HttpJsonResult.SuccessString(containerId);
+            return HttpJsonResult.Success(containerId);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error creating container: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error creating container: {ex.Message}");
         }
     }
 
@@ -216,17 +216,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(ContainerInspectResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Inspect([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> Inspect([FromBody] BaseRequest request)
     {
         try
         {
             var info = await Service.InspectContainerAsync(request.Id);
-            return HttpJsonResult.SuccessString(info);
+            return HttpJsonResult.Success(info);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error inspecting container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error inspecting container {request.Id}: {ex.Message}");
         }
     }
 
@@ -237,17 +237,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Rename([FromBody] RenameContainerRequest request)
+    public async Task<HttpJsonResult> Rename([FromBody] RenameContainerRequest request)
     {
         try
         {
             await Service.RenameContainerAsync(request.Id, request.Name);
-            return HttpJsonResult.SuccessString();
+            return HttpJsonResult.Success();
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error renaming container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error renaming container {request.Id}: {ex.Message}");
         }
     }
 
@@ -258,17 +258,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Pause([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> Pause([FromBody] BaseRequest request)
     {
         try
         {
             await Service.PauseContainerAsync(request.Id);
-            return HttpJsonResult.SuccessString(request.Id);
+            return HttpJsonResult.Success(request.Id);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error pausing container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error pausing container {request.Id}: {ex.Message}");
         }
     }
 
@@ -279,17 +279,17 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Unpause([FromBody] BaseRequest request)
+    public async Task<HttpJsonResult> Unpause([FromBody] BaseRequest request)
     {
         try
         {
             await Service.UnpauseContainerAsync(request.Id);
-            return HttpJsonResult.SuccessString(request.Id);
+            return HttpJsonResult.Success(request.Id);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error unpausing container {request.Id}: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error unpausing container {request.Id}: {ex.Message}");
         }
     }
 
@@ -301,7 +301,7 @@ public class ContainersController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> CreateAndStart([FromBody] ContainerCreateAndStartRequest request)
+    public async Task<HttpJsonResult> CreateAndStart([FromBody] ContainerCreateAndStartRequest request)
     {
         try
         {
@@ -337,12 +337,12 @@ public class ContainersController : BaseController
             };
 
             var containerId = await Service.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes, createNetworkRequest);
-            return HttpJsonResult.SuccessString(containerId);
+            return HttpJsonResult.Success(containerId);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error creating and starting container: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error creating and starting container: {ex.Message}");
         }
     }
 }

@@ -34,17 +34,17 @@ public class ImageController : BaseController
     [HttpGet]
     [ProducesResponseType(typeof(List<ImagesListResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> GetList()
+    public async Task<HttpJsonResult> GetList()
     {
         try
         {
             var images = await Service.GetImagesAsync();
-            return HttpJsonResult.SuccessString(images);
+            return HttpJsonResult.Success(images);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving image list: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error retrieving image list: {ex.Message}");
         }
     }
 
@@ -56,17 +56,17 @@ public class ImageController : BaseController
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Pull([FromBody] PullImageRequest request)
+    public async Task<HttpJsonResult> Pull([FromBody] PullImageRequest request)
     {
         try
         {
             await Service.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
-            return HttpJsonResult.SuccessString();
+            return HttpJsonResult.Success();
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error pulling image: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error pulling image: {ex.Message}");
         }
     }
 
@@ -78,17 +78,17 @@ public class ImageController : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<string> Remove([FromBody] BaseDeleteRequest request)
+    public async Task<HttpJsonResult> Remove([FromBody] BaseDeleteRequest request)
     {
         try
         {
             await Service.RemoveImageAsync(request.Id, request.IsForce);
-            return HttpJsonResult.SuccessString(request.Id);
+            return HttpJsonResult.Success(request.Id);
         }
         catch (Exception ex)
         {
             _logger.LogTrace(ex, ex.Message);
-            return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing image: {ex.Message}");
+            return HttpJsonResult.Error(StatusCodes.Status500InternalServerError, $"Error removing image: {ex.Message}");
         }
     }
 }

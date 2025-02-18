@@ -14,19 +14,9 @@ public sealed class PullImageRequest
     public string ImageName { get; set; }
 
     /// <summary>
-    /// 可选的镜像仓库地址，用于从特定的注册中心拉取镜像
+    /// Docker 镜像仓库地址授权
     /// </summary>
-    public string Registry { get; set; }
-
-    /// <summary>
-    /// 可选的用户名，用于身份验证以访问私有镜像仓库
-    /// </summary>
-    public string Username { get; set; }
-
-    /// <summary>
-    /// 可选的密码，用于身份验证以访问私有镜像仓库
-    /// </summary>
-    public string Password { get; set; }
+    public BaseAuthRequest Auth { get; set; }
 
     /// <summary>
     /// Docker 镜像标签

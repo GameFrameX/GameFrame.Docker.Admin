@@ -3,7 +3,7 @@ namespace Docker.Admin.Models;
 /// <summary>
 /// 请求消息基类
 /// </summary>
-public class BaseAuthRequest
+public sealed class BaseAuthRequest
 {
     /// <summary>
     /// 可选的镜像仓库地址，用于从特定的注册中心拉取镜像
@@ -19,4 +19,9 @@ public class BaseAuthRequest
     /// 可选的密码，用于身份验证以访问私有镜像仓库
     /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// 可选的邮件地址，用于身份验证以访问私有镜像仓库
+    /// </summary>
+    public string Email { get; set; }
 }

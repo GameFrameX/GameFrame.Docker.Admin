@@ -1,3 +1,4 @@
+using Docker.Admin.Models;
 using Docker.Admin.Models.Network;
 using Docker.DotNet;
 using Docker.DotNet.Models;
@@ -9,9 +10,6 @@ namespace Docker.Admin.Services;
 /// </summary>
 public sealed partial class DockerService
 {
-
-
-
     /// <summary>
     /// 获取所有镜像列表
     /// </summary>
@@ -29,24 +27,28 @@ public sealed partial class DockerService
     /// </summary>
     /// <param name="imageName">镜像名称</param>
     /// <param name="tag">镜像标签，默认为latest</param>
-    /// <param name="registry">可选的镜像仓库地址</param>
-    /// <param name="username">可选的用户名，用于身份验证</param>
-    /// <param name="password">可选的密码，用于身份验证</param>
+    /// <param name="auth">可选的Docker仓库认证信息</param>
     /// <remarks>
     /// 此方法用于从指定的镜像仓库拉取Docker镜像。
     /// 如果未提供标签，则默认使用"latest"标签。
     /// 该方法会创建一个新的镜像，并在后台处理进度。
     /// </remarks>
-    public async Task PullImageAsync(string imageName, string tag = "latest", string registry = "", string username = "", string password = "")
+    public async Task PullImageAsync(string imageName, string tag = "latest", BaseAuthRequest auth = null)
     {
-        await _dockerClient.Images.CreateImageAsync(
-            new ImagesCreateParameters
-            {
-                FromImage = imageName,
-                Tag = tag
-            },
-            new AuthConfig() { Username = username, Password = password, ServerAddress = registry },
-            new Progress<JSONMessage>());
+        var imagesCreateParameters = new ImagesCreateParameters
+        {
+            FromImage = imageName,
+            Tag = tag,
+        };
+        if (auth != null)
+        {
+            var authConfig = new AuthConfig { Username = auth.Username, Password = auth.Password, ServerAddress = auth.Registry, Email = auth.Email, };
+            await _dockerClient.Images.CreateImageAsync(imagesCreateParameters, authConfig, new Progress<JSONMessage>());
+        }
+        else
+        {
+            await _dockerClient.Images.CreateImageAsync(imagesCreateParameters, null, new Progress<JSONMessage>());
+        }
     }
 
     /// <summary>

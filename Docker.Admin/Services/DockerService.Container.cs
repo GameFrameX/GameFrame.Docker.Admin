@@ -1,3 +1,4 @@
+using Docker.Admin.Models;
 using Docker.Admin.Models.Network;
 using Docker.DotNet;
 using Docker.DotNet.Models;
@@ -127,8 +128,10 @@ public sealed partial class DockerService
     /// <param name="portBindings">端口映射字典</param>
     /// <param name="volumeBindings">卷映射字典</param>
     /// <param name="networkConfig">网络配置</param>
+    /// <param name="labelsVariables">标签</param>
+    /// <param name="command">命令列表</param>
     /// <returns>创建的容器ID</returns>
-    public async Task<string> CreateContainerAsync(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, CreateNetworkRequest networkConfig = null)
+    public async Task<string> CreateContainerAsync(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, NetworkConfig networkConfig = null, IDictionary<string, string> labelsVariables = null, IList<string> command = null)
     {
         var volumeList = new List<string>();
         if (volumeBindings != null)
@@ -141,19 +144,33 @@ public sealed partial class DockerService
 
         await CreateNetwork(networkConfig);
 
-        var parameters = new CreateContainerParameters();
-        parameters.Image = image;
-        parameters.Name = name;
+        var createContainerParameters = new CreateContainerParameters
+        {
+            Image = image,
+            Name = name,
+        };
+        // 标签
+        if (labelsVariables != null)
+        {
+            createContainerParameters.Labels = labelsVariables;
+        }
 
+        // 命令
+        if (command != null)
+        {
+            createContainerParameters.Cmd = command;
+        }
+
+        // 环境变量
         if (environmentVariables != null)
         {
-            parameters.Env = environmentVariables?.Select(kv => $"{kv.Key}={kv.Value}").ToList();
+            createContainerParameters.Env = environmentVariables?.Select(kv => $"{kv.Key}={kv.Value}").ToList();
         }
 
         // 网络
         if (networkConfig != null)
         {
-            parameters.NetworkingConfig = new NetworkingConfig
+            createContainerParameters.NetworkingConfig = new NetworkingConfig
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
@@ -170,26 +187,26 @@ public sealed partial class DockerService
         // 端口
         if (portBindings != null)
         {
-            parameters.HostConfig = new HostConfig();
-            parameters.HostConfig.PortBindings = new Dictionary<string, IList<PortBinding>>();
+            createContainerParameters.HostConfig = new HostConfig();
+            createContainerParameters.HostConfig.PortBindings = new Dictionary<string, IList<PortBinding>>();
 
             // 暴露且绑定端口
-            parameters.ExposedPorts = new Dictionary<string, EmptyStruct>();
+            createContainerParameters.ExposedPorts = new Dictionary<string, EmptyStruct>();
 
             foreach (var portBinding in portBindings)
             {
                 // 绑定端口
-                parameters.HostConfig.PortBindings[$"{portBinding.Value}/tcp"] = new List<PortBinding> { new PortBinding { HostPort = portBinding.Key } };
-                parameters.ExposedPorts[$"{portBinding.Key}/tcp"] = new EmptyStruct();
+                createContainerParameters.HostConfig.PortBindings[$"{portBinding.Value}/tcp"] = new List<PortBinding> { new PortBinding { HostPort = portBinding.Key } };
+                createContainerParameters.ExposedPorts[$"{portBinding.Key}/tcp"] = new EmptyStruct();
             }
         }
 
         if (volumeList.Count > 0)
         {
-            parameters.HostConfig.Binds = volumeList;
+            createContainerParameters.HostConfig.Binds = volumeList;
         }
 
-        var response = await _dockerClient.Containers.CreateContainerAsync(parameters);
+        var response = await _dockerClient.Containers.CreateContainerAsync(createContainerParameters);
 
         return response.ID;
     }
@@ -299,9 +316,7 @@ public sealed partial class DockerService
     /// </summary>
     /// <param name="image">要使用的Docker镜像名称</param>
     /// <param name="tag">镜像标签，默认为latest</param>
-    /// <param name="registry">可选的镜像仓库地址</param>
-    /// <param name="username">可选的用户名，用于身份验证</param>
-    /// <param name="password">可选的密码，用于身份验证</param>
+    /// <param name="auth">可选的Docker仓库认证信息</param>
     /// <param name="name">容器名称</param>
     /// <param name="environmentVariables">环境变量字典，包含容器启动时需要的环境变量</param>
     /// <param name="portBindings">端口映射字典，定义容器端口与主机端口的映射关系</param>
@@ -310,9 +325,9 @@ public sealed partial class DockerService
     /// <remarks>
     /// 此方法首先拉取指定的Docker镜像，然后创建一个新容器并启动它。
     /// </remarks>
-    public async Task<string> CreateAndStartContainer(string image, string tag, string registry, string username, string password, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, CreateNetworkRequest networkConfig = null)
+    public async Task<string> CreateAndStartContainer(string image, string tag, BaseAuthRequest auth, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, NetworkConfig networkConfig = null)
     {
-        await PullImageAsync(image, tag, registry, username, password);
+        await PullImageAsync(image, tag, auth);
         var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig);
         await StartContainerAsync(containerId);
         return containerId;

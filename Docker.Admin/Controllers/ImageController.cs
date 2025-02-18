@@ -60,7 +60,7 @@ public class ImageController : BaseController
     {
         try
         {
-            await Service.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
+            await Service.PullImageAsync(request.ImageName, request.Tag, request.Auth);
             return HttpJsonResult.Success();
         }
         catch (Exception ex)

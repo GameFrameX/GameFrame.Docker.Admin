@@ -187,8 +187,10 @@ public sealed partial class DockerService
         // 端口
         if (portBindings != null)
         {
-            createContainerParameters.HostConfig = new HostConfig();
-            createContainerParameters.HostConfig.PortBindings = new Dictionary<string, IList<PortBinding>>();
+            createContainerParameters.HostConfig = new HostConfig
+            {
+                PortBindings = new Dictionary<string, IList<PortBinding>>(),
+            };
 
             // 暴露且绑定端口
             createContainerParameters.ExposedPorts = new Dictionary<string, EmptyStruct>();
@@ -322,13 +324,15 @@ public sealed partial class DockerService
     /// <param name="portBindings">端口映射字典，定义容器端口与主机端口的映射关系</param>
     /// <param name="volumeBindings">卷映射字典，定义主机路径与容器路径的映射关系</param>
     /// <param name="networkConfig">可选的网络配置</param>
+    /// <param name="labelsVariables">标签</param>
+    /// <param name="command">命令列表</param>
     /// <remarks>
     /// 此方法首先拉取指定的Docker镜像，然后创建一个新容器并启动它。
     /// </remarks>
-    public async Task<string> CreateAndStartContainer(string image, string tag, BaseAuthRequest auth, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, NetworkConfig networkConfig = null)
+    public async Task<string> CreateAndStartContainer(string image, string tag, BaseAuthRequest auth, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, NetworkConfig networkConfig = null, IDictionary<string, string> labelsVariables = null, IList<string> command = null)
     {
         await PullImageAsync(image, tag, auth);
-        var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig);
+        var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig, labelsVariables, command);
         await StartContainerAsync(containerId);
         return containerId;
     }

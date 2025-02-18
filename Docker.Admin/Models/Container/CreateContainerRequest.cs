@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Docker.Admin.Models.Network;
 
 namespace Docker.Admin.Models.Container;
 
@@ -38,4 +39,14 @@ public sealed class CreateContainerRequest
     /// 环境变量配置
     /// </summary>
     public Dictionary<string, string> Environments { get; set; }
+
+    /// <summary>
+    /// 标签
+    /// </summary>
+    public IDictionary<string, string> Labels { get; set; }
+
+    /// <summary>
+    /// 命令
+    /// </summary>
+    public IList<string> Command { get; set; }
 }

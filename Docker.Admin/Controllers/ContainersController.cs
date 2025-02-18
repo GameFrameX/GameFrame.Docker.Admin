@@ -146,7 +146,7 @@ public class ContainersController : BaseController
     /// </summary>
     /// <param name="request">包含容器ID的请求</param>
     [HttpPost]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<HttpJsonResult> Restart([FromBody] BaseRequest request)
     {
@@ -199,7 +199,10 @@ public class ContainersController : BaseController
                                   request.Name,
                                   request.Environments,
                                   request.Ports,
-                                  request.Volumes);
+                                  request.Volumes,
+                                  request.NetworkConfig,
+                                  request.Labels,
+                                  request.Command);
             return HttpJsonResult.Success(containerId);
         }
         catch (Exception ex)
@@ -235,7 +238,7 @@ public class ContainersController : BaseController
     /// </summary>
     /// <param name="request">包含容器ID和新名称的请求</param>
     [HttpPost]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<HttpJsonResult> Rename([FromBody] RenameContainerRequest request)
     {
@@ -328,15 +331,7 @@ public class ContainersController : BaseController
                 }
             }
 
-            CreateNetworkRequest createNetworkRequest = new CreateNetworkRequest()
-            {
-                Name = request.NetworkName,
-                Subnet = request.NetworkSubnet,
-                IpAddress = request.NetworkIpAddress,
-                IsRecreate = request.NetworkIsRecreate,
-            };
-
-            var containerId = await Service.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes, createNetworkRequest);
+            var containerId = await Service.CreateAndStartContainer(request.ImageName, request.Tag, request.Auth, request.ContainerName, request.Environments, request.Ports, request.Volumes, request.NetworkConfig, request.Labels, request.Command);
             return HttpJsonResult.Success(containerId);
         }
         catch (Exception ex)

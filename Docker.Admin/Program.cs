@@ -1,6 +1,8 @@
 ﻿using Microsoft.OpenApi.Models;
 using System.Reflection;
+using Docker.Admin;
 using Docker.Admin.Services;
+using GameFrameX.Client.Api.Filter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,13 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 LoggerHandler.Start(builder);
 
 // 添加 MVC 服务
-builder.Services.AddControllers();
+builder.Services.AddControllers(option => { FilterApp.Init(option.Filters); });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-    
+
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",

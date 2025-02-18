@@ -6,26 +6,26 @@ using Docker.DotNet.Models;
 using GameFrameX.Foundation.Http.Normalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Docker.Admin.Controllers;
 
 /// <summary>
 /// Docker容器管理控制器
 /// </summary>
-[ApiController]
-[Route("api/[controller]/[action]")]
 [Produces("application/json")]
-public class ContainersController : ControllerBase
+public class ContainersController : BaseController
 {
-    private readonly DockerService _dockerService;
+    private readonly ILogger<ContainersController> _logger;
 
     /// <summary>
     /// 初始化ContainersController类的新实例。
     /// </summary>
     /// <param name="dockerService">Docker服务实例，用于与Docker进行交互</param>
-    public ContainersController(DockerService dockerService)
+    /// <param name="logger">日志记录器</param>
+    public ContainersController(DockerService dockerService, ILogger<ContainersController> logger) : base(dockerService)
     {
-        _dockerService = dockerService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,11 +41,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            var containers = await _dockerService.GetContainersAsync();
+            var containers = await Service.GetContainersAsync();
             return HttpJsonResult.SuccessString(containers);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving container list: {ex.Message}");
         }
     }
@@ -66,11 +67,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            var logs = await _dockerService.GetContainerLogsAsync(request.Id);
+            var logs = await Service.GetContainerLogsAsync(request.Id);
             return HttpJsonResult.SuccessString(logs);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving logs for container {request.Id}: {ex.Message}");
         }
     }
@@ -86,11 +88,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.StartContainerAsync(request.Id);
+            await Service.StartContainerAsync(request.Id);
             return HttpJsonResult.SuccessString(request.Id);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error starting container {request.Id}: {ex.Message}");
         }
     }
@@ -106,11 +109,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.StopContainerAsync(request.Id);
+            await Service.StopContainerAsync(request.Id);
             return HttpJsonResult.SuccessString(request.Id);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error stopping container {request.Id}: {ex.Message}");
         }
     }
@@ -127,11 +131,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            var stats = await _dockerService.GetContainerStatsAsync(request.Id);
+            var stats = await Service.GetContainerStatsAsync(request.Id);
             return HttpJsonResult.SuccessString(stats);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving stats for container {request.Id}: {ex.Message}");
         }
     }
@@ -147,11 +152,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.RestartContainerAsync(request.Id);
+            await Service.RestartContainerAsync(request.Id);
             return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error restarting container {request.Id}: {ex.Message}");
         }
     }
@@ -167,11 +173,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.RemoveContainerAsync(request.Id, request.IsForce);
+            await Service.RemoveContainerAsync(request.Id, request.IsForce);
             return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing container {request.Id}: {ex.Message}");
         }
     }
@@ -187,7 +194,7 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            var containerId = await _dockerService.CreateContainerAsync(
+            var containerId = await Service.CreateContainerAsync(
                                   request.Image,
                                   request.Name,
                                   request.Environments,
@@ -197,6 +204,7 @@ public class ContainersController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error creating container: {ex.Message}");
         }
     }
@@ -212,11 +220,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            var info = await _dockerService.InspectContainerAsync(request.Id);
+            var info = await Service.InspectContainerAsync(request.Id);
             return HttpJsonResult.SuccessString(info);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error inspecting container {request.Id}: {ex.Message}");
         }
     }
@@ -232,11 +241,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.RenameContainerAsync(request.Id, request.Name);
+            await Service.RenameContainerAsync(request.Id, request.Name);
             return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error renaming container {request.Id}: {ex.Message}");
         }
     }
@@ -252,11 +262,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.PauseContainerAsync(request.Id);
+            await Service.PauseContainerAsync(request.Id);
             return HttpJsonResult.SuccessString(request.Id);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error pausing container {request.Id}: {ex.Message}");
         }
     }
@@ -272,11 +283,12 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            await _dockerService.UnpauseContainerAsync(request.Id);
+            await Service.UnpauseContainerAsync(request.Id);
             return HttpJsonResult.SuccessString(request.Id);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error unpausing container {request.Id}: {ex.Message}");
         }
     }
@@ -295,7 +307,7 @@ public class ContainersController : ControllerBase
         {
             if (request.IsRecreate)
             {
-                var containers = await _dockerService.GetContainersAsync();
+                var containers = await Service.GetContainersAsync();
                 bool isFind = false;
                 foreach (var container in containers)
                 {
@@ -303,7 +315,7 @@ public class ContainersController : ControllerBase
                     {
                         if (containerName.Substring(1).Equals(request.ContainerName, StringComparison.OrdinalIgnoreCase))
                         {
-                            await _dockerService.RemoveContainerAsync(container.ID, true);
+                            await Service.RemoveContainerAsync(container.ID, true);
                             isFind = true;
                             break;
                         }
@@ -324,11 +336,12 @@ public class ContainersController : ControllerBase
                 IsRecreate = request.NetworkIsRecreate,
             };
 
-            var containerId = await _dockerService.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes, createNetworkRequest);
+            var containerId = await Service.CreateAndStartContainer(request.ImageName, request.Tag, request.Registry, request.Username, request.Password, request.ContainerName, request.Environments, request.Ports, request.Volumes, createNetworkRequest);
             return HttpJsonResult.SuccessString(containerId);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error creating and starting container: {ex.Message}");
         }
     }

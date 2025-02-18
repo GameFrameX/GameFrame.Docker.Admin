@@ -5,26 +5,26 @@ using Docker.DotNet.Models;
 using GameFrameX.Foundation.Http.Normalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Docker.Admin.Controllers;
 
 /// <summary>
 /// Docker镜像管理控制器
 /// </summary>
-[ApiController]
-[Route("api/[controller]/[action]")]
 [Produces("application/json")]
-public class ImageController : ControllerBase
+public class ImageController : BaseController
 {
-    private readonly DockerService _dockerService;
+    private readonly ILogger<ImageController> _logger;
 
     /// <summary>
     /// 初始化ImageController类的新实例。
     /// </summary>
     /// <param name="dockerService">Docker服务实例，用于与Docker进行交互</param>
-    public ImageController(DockerService dockerService)
+    /// <param name="logger">日志记录器</param>
+    public ImageController(DockerService dockerService, ILogger<ImageController> logger) : base(dockerService)
     {
-        _dockerService = dockerService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -38,11 +38,12 @@ public class ImageController : ControllerBase
     {
         try
         {
-            var images = await _dockerService.GetImagesAsync();
+            var images = await Service.GetImagesAsync();
             return HttpJsonResult.SuccessString(images);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving image list: {ex.Message}");
         }
     }
@@ -59,11 +60,12 @@ public class ImageController : ControllerBase
     {
         try
         {
-            await _dockerService.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
+            await Service.PullImageAsync(request.ImageName, request.Tag, request.Registry, request.Username, request.Password);
             return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error pulling image: {ex.Message}");
         }
     }
@@ -80,11 +82,12 @@ public class ImageController : ControllerBase
     {
         try
         {
-            await _dockerService.RemoveImageAsync(request.Id, request.IsForce);
+            await Service.RemoveImageAsync(request.Id, request.IsForce);
             return HttpJsonResult.SuccessString(request.Id);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing image: {ex.Message}");
         }
     }

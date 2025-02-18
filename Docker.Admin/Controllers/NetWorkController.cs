@@ -4,6 +4,7 @@ using Docker.DotNet.Models;
 using GameFrameX.Foundation.Http.Normalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Docker.Admin.Controllers;
 
@@ -11,20 +12,19 @@ namespace Docker.Admin.Controllers;
 /// Docker网络管理控制器
 /// 提供对Docker网络的管理功能，包括获取网络列表、获取特定网络信息、创建和删除网络。
 /// </summary>
-[ApiController]
-[Route("api/[controller]/[action]")]
 [Produces("application/json")]
-public class NetWorkController : ControllerBase
+public class NetWorkController : BaseController
 {
-    private readonly DockerService _dockerService;
+    private readonly ILogger<NetWorkController> _logger;
 
     /// <summary>
     /// 初始化NetWorkController类的新实例。
     /// </summary>
     /// <param name="dockerService">Docker服务实例，用于与Docker进行交互</param>
-    public NetWorkController(DockerService dockerService)
+    /// <param name="logger">日志记录器</param>
+    public NetWorkController(DockerService dockerService, ILogger<NetWorkController> logger) : base(dockerService)
     {
-        _dockerService = dockerService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -38,11 +38,12 @@ public class NetWorkController : ControllerBase
     {
         try
         {
-            var networks = await _dockerService.GetNetworks();
+            var networks = await Service.GetNetworks();
             return HttpJsonResult.SuccessString(networks);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving network list: {ex.Message}");
         }
     }
@@ -59,11 +60,12 @@ public class NetWorkController : ControllerBase
     {
         try
         {
-            var network = await _dockerService.GetNetwork(request.Name);
+            var network = await Service.GetNetwork(request.Name);
             return HttpJsonResult.SuccessString(network);
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error retrieving network information: {ex.Message}");
         }
     }
@@ -80,11 +82,12 @@ public class NetWorkController : ControllerBase
     {
         try
         {
-            await _dockerService.CreateNetwork(request);
+            await Service.CreateNetwork(request);
             return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error creating network: {ex.Message}");
         }
     }
@@ -101,11 +104,12 @@ public class NetWorkController : ControllerBase
     {
         try
         {
-            await _dockerService.DeleteNetwork(request);
+            await Service.DeleteNetwork(request);
             return HttpJsonResult.SuccessString();
         }
         catch (Exception ex)
         {
+            _logger.LogTrace(ex, ex.Message);
             return HttpJsonResult.ErrorString(StatusCodes.Status500InternalServerError, $"Error removing network: {ex.Message}");
         }
     }

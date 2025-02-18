@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Docker.Admin.Models.Image;
 
 /// <summary>

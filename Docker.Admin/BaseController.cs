@@ -1,10 +1,7 @@
-﻿using Docker.Admin.Services;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Docker.Admin;
+﻿namespace Docker.Admin;
 
 /// <summary>
-/// 增加统一的控制器基类
+/// 统一的控制器基类
 /// </summary>
 [Route("api/[controller]/[action]")]
 [ApiController]

@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Newtonsoft.Json;
-
 namespace Docker.Admin.Filter;
 
 /// <summary>
@@ -27,7 +23,7 @@ public sealed class GlobalRequestHandlerFilter : IActionFilter
         {
             var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
 
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}: req ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonConvert.SerializeObject(context.ActionArguments)}");
+            Log.Information($"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}: req ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonHelper.Serialize(context.ActionArguments)}");
         }
     }
 }

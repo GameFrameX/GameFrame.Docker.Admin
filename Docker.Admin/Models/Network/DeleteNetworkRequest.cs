@@ -1,7 +1,3 @@
-// 定义请求类以删除网络
-
-using System.ComponentModel.DataAnnotations;
-
 namespace Docker.Admin.Models.Network;
 
 /// <summary>

@@ -1,5 +1,3 @@
-using Docker.DotNet;
-
 namespace Docker.Admin.Services;
 
 /// <summary>

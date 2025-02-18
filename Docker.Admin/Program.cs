@@ -1,8 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Docker.Admin;
-using Docker.Admin.Services;
-using GameFrameX.Client.Api.Filter;
+using Docker.Admin.Filter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

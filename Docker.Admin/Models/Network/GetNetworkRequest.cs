@@ -1,7 +1,3 @@
-// 定义请求类以获取网络信息
-
-using System.ComponentModel.DataAnnotations;
-
 namespace Docker.Admin.Models.Network;
 
 /// <summary>

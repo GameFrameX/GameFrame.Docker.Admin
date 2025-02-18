@@ -82,7 +82,7 @@ public class NetWorkController : BaseController
     {
         try
         {
-            await Service.CreateNetwork(request);
+            await Service.CreateNetwork(request.NetworkConfig);
             return HttpJsonResult.Success();
         }
         catch (Exception ex)

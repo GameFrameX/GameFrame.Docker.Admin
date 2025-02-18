@@ -59,7 +59,7 @@ public sealed partial class DockerService
     /// 创建自定义网络
     /// </summary>
     /// <param name="networkConfig">网络配置，包括名称、子网等信息</param>
-    public async Task CreateNetwork(CreateNetworkRequest networkConfig)
+    public async Task CreateNetwork(NetworkConfig networkConfig)
     {
         if (networkConfig == null)
         {

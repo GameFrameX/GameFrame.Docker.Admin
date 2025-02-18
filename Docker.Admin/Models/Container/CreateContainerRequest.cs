@@ -20,6 +20,11 @@ public sealed class CreateContainerRequest
     public string Name { get; set; }
 
     /// <summary>
+    /// 网络配置
+    /// </summary>
+    public NetworkConfig NetworkConfig { get; set; }
+
+    /// <summary>
     /// 端口映射配置，格式如: "8080:80"
     /// </summary>
     public Dictionary<string, string> Ports { get; set; }

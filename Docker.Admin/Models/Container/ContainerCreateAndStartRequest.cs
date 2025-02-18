@@ -31,24 +31,9 @@ public sealed class ContainerCreateAndStartRequest : BaseAuthRequest
     public bool IsRecreate { get; set; }
 
     /// <summary>
-    /// 获取或设置网络的名称
+    /// 网络配置
     /// </summary>
-    public string NetworkName { get; set; }
-
-    /// <summary>
-    /// 获取或设置网络的子网地址
-    /// </summary>
-    public string NetworkSubnet { get; set; }
-
-    /// <summary>
-    /// 获取或设置网络的IP地址
-    /// </summary>
-    public string NetworkIpAddress { get; set; }
-
-    /// <summary>
-    /// 是否强制重新创建网络
-    /// </summary>
-    public bool NetworkIsRecreate { get; set; }
+    public NetworkConfig NetworkConfig { get; set; }
 
     /// <summary>
     /// 端口映射配置，格式如: "8080:80"

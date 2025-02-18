@@ -97,6 +97,7 @@ public sealed partial class DockerService
                         new IPAMConfig
                         {
                             Subnet = networkConfig.Subnet + "/24", // 设置子网
+                            Gateway = networkConfig.Gateway, // 设置网关
                         },
                     },
                 },

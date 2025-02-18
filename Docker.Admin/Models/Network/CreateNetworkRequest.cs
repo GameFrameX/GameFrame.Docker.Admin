@@ -20,6 +20,12 @@ public sealed class CreateNetworkRequest
     public string Subnet { get; set; }
 
     /// <summary>
+    /// 获取或设置网络的网关地址
+    /// </summary>
+    [Required]
+    public string Gateway { get; set; }
+
+    /// <summary>
     /// 获取或设置是否重新创建同名网络的标志
     /// </summary>
     [Required]

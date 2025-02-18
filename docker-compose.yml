@@ -9,6 +9,7 @@
       - gameframex-network  # 可以自定义网络名称
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # 挂载 Docker socket
+      - ./running/logs:/app/logs  # 挂载 日志目录
 networks:
   gameframex-network: # 定义网络
     driver: bridge  # 网络驱动类型

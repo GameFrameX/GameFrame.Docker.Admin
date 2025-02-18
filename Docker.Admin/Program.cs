@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
+LoggerHandler.Start(builder);
 
 // 添加 MVC 服务
 builder.Services.AddControllers();

@@ -185,7 +185,7 @@ public class ContainersController : BaseController
         try
         {
             var containerId = await Service.CreateContainerAsync(
-                                  request.Image,
+                                  request.ImageName,
                                   request.Name,
                                   request.Environments,
                                   request.Ports,

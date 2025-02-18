@@ -6,7 +6,7 @@ namespace Docker.Admin.Models.Image;
 public sealed class PullImageRequest
 {
     /// <summary>
-    /// Docker 镜像名称
+    /// Docker 镜像名称, 不要要包含tag
     /// </summary>
     [Required]
     public string ImageName { get; set; }

@@ -8,10 +8,10 @@ namespace Docker.Admin.Models.Container;
 public sealed class CreateContainerRequest
 {
     /// <summary>
-    /// 镜像名称
+    /// Docker 镜像名称, 需要包含tag, 例如: redis:latest。不传递tag 会自动使用:latest
     /// </summary>
     [Required]
-    public string Image { get; set; }
+    public string ImageName { get; set; }
 
     /// <summary>
     /// 容器名称

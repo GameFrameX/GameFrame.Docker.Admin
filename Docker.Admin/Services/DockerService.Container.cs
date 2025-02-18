@@ -179,8 +179,8 @@ public sealed partial class DockerService
             foreach (var portBinding in portBindings)
             {
                 // 绑定端口
-                parameters.HostConfig.PortBindings[portBinding.Value] = new List<PortBinding> { new PortBinding { HostPort = portBinding.Key } };
-                parameters.ExposedPorts[portBinding.Value] = default;
+                parameters.HostConfig.PortBindings[portBinding.Value] = new List<PortBinding> { new PortBinding { HostIP = "0.0.0.0", HostPort = portBinding.Key } };
+                parameters.ExposedPorts[portBinding.Value] = new EmptyStruct();
             }
         }
 
@@ -188,7 +188,6 @@ public sealed partial class DockerService
         {
             parameters.HostConfig.Binds = volumeList;
         }
-
 
         var response = await _dockerClient.Containers.CreateContainerAsync(parameters);
 

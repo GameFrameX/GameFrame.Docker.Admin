@@ -1,3 +1,5 @@
+using GameFrameX.Foundation.Logger;
+
 namespace Docker.Admin.Filter;
 
 /// <summary>
@@ -22,8 +24,7 @@ public sealed class GlobalRequestHandlerFilter : IActionFilter
         if (context.Controller is BaseController baseController)
         {
             var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
-
-            Log.Information($"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}: req ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonHelper.Serialize(context.ActionArguments)}");
+            LogHelper.Info($"req ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonHelper.Serialize(context.ActionArguments)}");
         }
     }
 }

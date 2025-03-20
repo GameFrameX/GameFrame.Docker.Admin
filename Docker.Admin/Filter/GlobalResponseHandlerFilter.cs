@@ -1,3 +1,5 @@
+using GameFrameX.Foundation.Logger;
+
 namespace Docker.Admin.Filter;
 
 /// <summary>
@@ -21,7 +23,7 @@ public sealed class GlobalResponseHandlerFilter : IActionFilter
         if (context.Result is ObjectResult objectResult)
         {
             var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
-            Log.Information($"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}: resp ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonConvert.SerializeObject(objectResult.Value)}");
+            LogHelper.Info($"resp ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonConvert.SerializeObject(objectResult.Value)}");
         }
     }
 

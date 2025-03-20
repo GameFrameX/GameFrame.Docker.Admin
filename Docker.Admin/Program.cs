@@ -2,12 +2,15 @@
 using System.Reflection;
 using Docker.Admin;
 using Docker.Admin.Filter;
+using GameFrameX.Foundation.Logger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
-LoggerHandler.Start(builder);
+var logger = LogHandler.Create(LogOptions.Default);
+
+builder.Host.UseSerilog(logger);
 
 // 添加 MVC 服务
 builder.Services.AddControllers(option => { FilterApp.Init(option.Filters); });

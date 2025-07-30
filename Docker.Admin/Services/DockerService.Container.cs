@@ -157,27 +157,10 @@ public sealed partial class DockerService
         // 命令
         createContainerParameters.Cmd = command ?? new List<string>() { string.Empty };
 
-        // 环境变量
-        if (environmentVariables != null)
+        // 环境变量配置
+        if (environmentVariables != null && environmentVariables.Count > 0)
         {
-            createContainerParameters.Env = environmentVariables?.Select(kv => $"{kv.Key}={kv.Value}").ToList();
-        }
-
-        // 网络
-        if (networkConfig != null)
-        {
-            createContainerParameters.NetworkingConfig = new NetworkingConfig
-            {
-                EndpointsConfig = new Dictionary<string, EndpointSettings>
-                {
-                    {
-                        networkConfig.Name, new EndpointSettings()
-                        {
-                            IPAddress = networkConfig.IpAddress,
-                        }
-                    },
-                },
-            };
+            createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);
         }
 
         // 端口
@@ -338,5 +321,68 @@ public sealed partial class DockerService
         var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig, labelsVariables, command);
         await StartContainerAsync(containerId);
         return containerId;
+    }
+
+    /// <summary>
+    /// 处理环境变量，验证并格式化为Docker容器可用的格式
+    /// </summary>
+    /// <param name="environmentVariables">环境变量字典，包含键值对形式的环境变量</param>
+    /// <returns>格式化后的环境变量字符串列表，格式为"KEY=VALUE"</returns>
+    /// <exception cref="ArgumentException">当环境变量键为空、包含非法字符或值包含非法字符时抛出</exception>
+    /// <remarks>
+    /// 此方法执行以下验证和处理：
+    /// <list type="bullet">
+    /// <item><description>验证环境变量键不能为空或仅包含空白字符</description></item>
+    /// <item><description>验证环境变量键不能包含等号(=)或空字符(\0)</description></item>
+    /// <item><description>验证环境变量值不能包含空字符(\0)</description></item>
+    /// <item><description>将null值转换为空字符串</description></item>
+    /// <item><description>使用预分配容量的List&lt;string&gt;优化内存分配</description></item>
+    /// </list>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var envVars = new Dictionary&lt;string, string&gt;
+    /// {
+    ///     { "APP_NAME", "my-app" },
+    ///     { "DEBUG_MODE", "true" },
+    ///     { "API_KEY", null } // 将被转换为空字符串
+    /// };
+    /// var result = ProcessEnvironmentVariables(envVars);
+    /// // 结果: ["APP_NAME=my-app", "DEBUG_MODE=true", "API_KEY="]
+    /// </code>
+    /// </example>
+    private static List<string> ProcessEnvironmentVariables(IDictionary<string, string> environmentVariables)
+    {
+        // 使用对象池优化内存分配
+        var envList = new List<string>(environmentVariables.Count);
+        
+        foreach (var envVar in environmentVariables)
+        {
+            // 验证环境变量键值对的有效性
+            if (string.IsNullOrWhiteSpace(envVar.Key))
+            {
+                throw new ArgumentException("环境变量的键不能为空或仅包含空白字符", nameof(environmentVariables));
+            }
+            
+            // 检查键名是否包含非法字符
+            if (envVar.Key.Contains('=') || envVar.Key.Contains('\0'))
+            {
+                throw new ArgumentException($"环境变量键 '{envVar.Key}' 包含非法字符（= 或 \\0）", nameof(environmentVariables));
+            }
+            
+            // 处理值为null的情况
+            var value = envVar.Value ?? string.Empty;
+            
+            // 检查值是否包含非法字符
+            if (value.Contains('\0'))
+            {
+                throw new ArgumentException($"环境变量 '{envVar.Key}' 的值包含非法字符（\\0）", nameof(environmentVariables));
+            }
+            
+            // 构建环境变量字符串
+            envList.Add($"{envVar.Key}={value}");
+        }
+        
+        return envList;
     }
 }

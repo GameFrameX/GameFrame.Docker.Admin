@@ -32,7 +32,6 @@ public sealed class NetworkConfig
     /// <summary>
     /// 获取或设置网络的IP地址
     /// </summary>
-    [Required]
     public string IpAddress { get; set; }
 
     /// <summary>

@@ -130,15 +130,6 @@ public sealed partial class DockerService
     /// <returns>创建的容器ID</returns>
     public async Task<string> CreateContainerAsync(string image, string name, IDictionary<string, string> environmentVariables = null, IDictionary<string, string> portBindings = null, IDictionary<string, string> volumeBindings = null, NetworkConfig networkConfig = null, IDictionary<string, string> labelsVariables = null, IList<string> command = null)
     {
-        var volumeList = new List<string>();
-        if (volumeBindings != null)
-        {
-            foreach (var volumeBinding in volumeBindings)
-            {
-                volumeList.Add($"{volumeBinding.Key}:{volumeBinding.Value}");
-            }
-        }
-
         await CreateNetwork(networkConfig);
 
         var createContainerParameters = new CreateContainerParameters
@@ -197,14 +188,23 @@ public sealed partial class DockerService
             }
         }
 
-        if (volumeList.Count > 0)
+        // 卷配置
+        if (volumeBindings != null && volumeBindings.Count > 0)
         {
-            if (createContainerParameters.HostConfig == null)
-            {
-                createContainerParameters.HostConfig = new HostConfig();
-            }
+            // 配置容器内的挂载点声明
+            createContainerParameters.Volumes = new Dictionary<string, EmptyStruct>();
 
-            createContainerParameters.HostConfig.Binds = volumeList;
+            // 配置主机到容器的卷绑定
+            createContainerParameters.HostConfig.Binds = new List<string>();
+
+            foreach (var volumeBinding in volumeBindings)
+            {
+                // 添加容器内挂载点声明
+                createContainerParameters.Volumes[volumeBinding.Value] = new EmptyStruct();
+
+                // 添加主机到容器的卷绑定
+                createContainerParameters.HostConfig.Binds.Add($"{volumeBinding.Key}:{volumeBinding.Value}");
+            }
         }
 
         var response = await _dockerClient.Containers.CreateContainerAsync(createContainerParameters);

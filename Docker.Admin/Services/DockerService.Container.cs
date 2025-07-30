@@ -158,10 +158,7 @@ public sealed partial class DockerService
         createContainerParameters.Cmd = command ?? new List<string>() { string.Empty };
 
         // 环境变量配置
-        if (environmentVariables != null && environmentVariables.Count > 0)
-        {
-            createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);
-        }
+        createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);
 
         // 端口
         if (portBindings != null)
@@ -326,12 +323,13 @@ public sealed partial class DockerService
     /// <summary>
     /// 处理环境变量，验证并格式化为Docker容器可用的格式
     /// </summary>
-    /// <param name="environmentVariables">环境变量字典，包含键值对形式的环境变量</param>
-    /// <returns>格式化后的环境变量字符串列表，格式为"KEY=VALUE"</returns>
+    /// <param name="environmentVariables">环境变量字典，包含键值对形式的环境变量。如果为null，则返回空列表</param>
+    /// <returns>格式化后的环境变量字符串列表，格式为"KEY=VALUE"。如果输入为null或空，则返回空列表</returns>
     /// <exception cref="ArgumentException">当环境变量键为空、包含非法字符或值包含非法字符时抛出</exception>
     /// <remarks>
     /// 此方法执行以下验证和处理：
     /// <list type="bullet">
+    /// <item><description>如果输入参数为null，直接返回空列表</description></item>
     /// <item><description>验证环境变量键不能为空或仅包含空白字符</description></item>
     /// <item><description>验证环境变量键不能包含等号(=)或空字符(\0)</description></item>
     /// <item><description>验证环境变量值不能包含空字符(\0)</description></item>
@@ -341,6 +339,7 @@ public sealed partial class DockerService
     /// </remarks>
     /// <example>
     /// <code>
+    /// // 正常使用
     /// var envVars = new Dictionary&lt;string, string&gt;
     /// {
     ///     { "APP_NAME", "my-app" },
@@ -349,10 +348,20 @@ public sealed partial class DockerService
     /// };
     /// var result = ProcessEnvironmentVariables(envVars);
     /// // 结果: ["APP_NAME=my-app", "DEBUG_MODE=true", "API_KEY="]
+    /// 
+    /// // null 参数处理
+    /// var emptyResult = ProcessEnvironmentVariables(null);
+    /// // 结果: [] (空列表)
     /// </code>
     /// </example>
     private static List<string> ProcessEnvironmentVariables(IDictionary<string, string> environmentVariables)
     {
+        // 如果参数为null，返回空列表
+        if (environmentVariables == null)
+        {
+            return new List<string>();
+        }
+        
         // 使用对象池优化内存分配
         var envList = new List<string>(environmentVariables.Count);
         

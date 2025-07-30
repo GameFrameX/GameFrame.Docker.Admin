@@ -137,7 +137,12 @@ public sealed partial class DockerService
             Image = image,
             Name = name,
             // 主机名
-            HostConfig = new HostConfig() { PortBindings = new Dictionary<string, IList<PortBinding>>() },
+            HostConfig = new HostConfig()
+            {
+                PortBindings = new Dictionary<string, IList<PortBinding>>(),
+                Binds = new List<string>(),
+                NetworkMode = "bridge" // 显式设置网络模式为bridge，确保端口映射正常工作
+            },
             // 暴露端口
             ExposedPorts = new Dictionary<string, EmptyStruct>(),
             // 健康检查
@@ -145,14 +150,10 @@ public sealed partial class DockerService
             // 网络
             NetworkingConfig = new NetworkingConfig(),
             // 容器内的挂载点声明
-            Volumes = new Dictionary<string, EmptyStruct>()
+            Volumes = new Dictionary<string, EmptyStruct>(),
+            // 标签
+            Labels = labelsVariables
         };
-
-        // 标签
-        if (labelsVariables != null)
-        {
-            createContainerParameters.Labels = labelsVariables;
-        }
 
         // 命令
         createContainerParameters.Cmd = command ?? new List<string>() { string.Empty };
@@ -160,15 +161,59 @@ public sealed partial class DockerService
         // 环境变量配置
         createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);
 
+        // 网络
+        // if (networkConfig != null)
+        // {
+        //     createContainerParameters.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>
+        //     {
+        //         {
+        //             networkConfig.Name, new EndpointSettings()
+        //             {
+        //                 IPAddress = networkConfig.IpAddress,
+        //             }
+        //         },
+        //     };
+        // }
+
         // 端口
         if (portBindings != null)
         {
             // 暴露且绑定端口
-            foreach (var portBinding in portBindings)
+            foreach (var portBindingPair in portBindings)
             {
-                // 绑定端口
-                createContainerParameters.HostConfig.PortBindings[$"{portBinding.Value}/tcp"] = new List<PortBinding> { new PortBinding { HostPort = portBinding.Key } };
-                createContainerParameters.ExposedPorts[$"{portBinding.Key}/tcp"] = new EmptyStruct();
+                // 绑定端口：Key是主机端口，Value是容器端口
+                var hostPort = portBindingPair.Key;
+                var containerPort = portBindingPair.Value;
+                var containerPortKey = $"{containerPort}/tcp";
+
+                // 验证端口号是否有效
+                if (!int.TryParse(hostPort, out var hostPortNum) || hostPortNum <= 0 || hostPortNum > 65535)
+                {
+                    continue;
+                }
+
+                if (!int.TryParse(containerPort, out var containerPortNum) || containerPortNum <= 0 || containerPortNum > 65535)
+                {
+                    continue;
+                }
+
+                // 配置端口绑定 - 使用更明确的方式
+                var portBindingConfig = new PortBinding
+                {
+                    HostPort = hostPort,
+                    HostIP = "0.0.0.0", // 绑定到所有接口
+                };
+
+                // 确保PortBindings字典中有这个容器端口的条目
+                if (!createContainerParameters.HostConfig.PortBindings.ContainsKey(containerPortKey))
+                {
+                    createContainerParameters.HostConfig.PortBindings[containerPortKey] = new List<PortBinding>();
+                }
+
+                createContainerParameters.HostConfig.PortBindings[containerPortKey].Add(portBindingConfig);
+
+                // 暴露容器端口
+                createContainerParameters.ExposedPorts[containerPortKey] = new EmptyStruct();
             }
         }
 
@@ -176,11 +221,7 @@ public sealed partial class DockerService
         if (volumeBindings != null && volumeBindings.Count > 0)
         {
             // 配置容器内的挂载点声明
-            createContainerParameters.Volumes = new Dictionary<string, EmptyStruct>();
-
             // 配置主机到容器的卷绑定
-            createContainerParameters.HostConfig.Binds = new List<string>();
-
             foreach (var volumeBinding in volumeBindings)
             {
                 // 添加容器内挂载点声明
@@ -191,6 +232,7 @@ public sealed partial class DockerService
             }
         }
 
+        // 创建容器
         var response = await _dockerClient.Containers.CreateContainerAsync(createContainerParameters);
 
         return response.ID;
@@ -316,7 +358,7 @@ public sealed partial class DockerService
     {
         await PullImageAsync(image, tag, auth);
         var containerId = await CreateContainerAsync($"{image}:{tag}", name, environmentVariables, portBindings, volumeBindings, networkConfig, labelsVariables, command);
-        await StartContainerAsync(containerId);
+        await RestartContainerAsync(containerId);
         return containerId;
     }
 
@@ -361,10 +403,10 @@ public sealed partial class DockerService
         {
             return new List<string>();
         }
-        
+
         // 使用对象池优化内存分配
         var envList = new List<string>(environmentVariables.Count);
-        
+
         foreach (var envVar in environmentVariables)
         {
             // 验证环境变量键值对的有效性
@@ -372,26 +414,26 @@ public sealed partial class DockerService
             {
                 throw new ArgumentException("环境变量的键不能为空或仅包含空白字符", nameof(environmentVariables));
             }
-            
+
             // 检查键名是否包含非法字符
             if (envVar.Key.Contains('=') || envVar.Key.Contains('\0'))
             {
                 throw new ArgumentException($"环境变量键 '{envVar.Key}' 包含非法字符（= 或 \\0）", nameof(environmentVariables));
             }
-            
+
             // 处理值为null的情况
             var value = envVar.Value ?? string.Empty;
-            
+
             // 检查值是否包含非法字符
             if (value.Contains('\0'))
             {
                 throw new ArgumentException($"环境变量 '{envVar.Key}' 的值包含非法字符（\\0）", nameof(environmentVariables));
             }
-            
+
             // 构建环境变量字符串
             envList.Add($"{envVar.Key}={value}");
         }
-        
+
         return envList;
     }
 }

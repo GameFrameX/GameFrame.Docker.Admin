@@ -136,7 +136,18 @@ public sealed partial class DockerService
         {
             Image = image,
             Name = name,
+            // 主机名
+            HostConfig = new HostConfig() { PortBindings = new Dictionary<string, IList<PortBinding>>() },
+            // 暴露端口
+            ExposedPorts = new Dictionary<string, EmptyStruct>(),
+            // 健康检查
+            Healthcheck = new HealthConfig(),
+            // 网络
+            NetworkingConfig = new NetworkingConfig(),
+            // 容器内的挂载点声明
+            Volumes = new Dictionary<string, EmptyStruct>()
         };
+
         // 标签
         if (labelsVariables != null)
         {
@@ -172,14 +183,7 @@ public sealed partial class DockerService
         // 端口
         if (portBindings != null)
         {
-            createContainerParameters.HostConfig = new HostConfig
-            {
-                PortBindings = new Dictionary<string, IList<PortBinding>>(),
-            };
-
             // 暴露且绑定端口
-            createContainerParameters.ExposedPorts = new Dictionary<string, EmptyStruct>();
-
             foreach (var portBinding in portBindings)
             {
                 // 绑定端口

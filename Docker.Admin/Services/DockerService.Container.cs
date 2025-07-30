@@ -153,10 +153,7 @@ public sealed partial class DockerService
         }
 
         // 命令
-        if (command != null)
-        {
-            createContainerParameters.Cmd = command;
-        }
+        createContainerParameters.Cmd = command ?? new List<string>() { string.Empty };
 
         // 环境变量
         if (environmentVariables != null)

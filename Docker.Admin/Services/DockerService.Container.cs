@@ -202,6 +202,11 @@ public sealed partial class DockerService
 
         if (volumeList.Count > 0)
         {
+            if (createContainerParameters.HostConfig == null)
+            {
+                createContainerParameters.HostConfig = new HostConfig();
+            }
+
             createContainerParameters.HostConfig.Binds = volumeList;
         }
 

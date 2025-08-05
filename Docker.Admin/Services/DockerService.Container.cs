@@ -162,18 +162,15 @@ public sealed partial class DockerService
         createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);
 
         // 网络
-        // if (networkConfig != null)
-        // {
-        //     createContainerParameters.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>
-        //     {
-        //         {
-        //             networkConfig.Name, new EndpointSettings()
-        //             {
-        //                 IPAddress = networkConfig.IpAddress,
-        //             }
-        //         },
-        //     };
-        // }
+        if (networkConfig != null)
+        {
+            createContainerParameters.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>
+            {
+                {
+                    networkConfig.Name, new EndpointSettings()
+                },
+            };
+        }
 
         // 端口
         if (portBindings != null)

@@ -156,7 +156,7 @@ public sealed partial class DockerService
         };
 
         // 命令
-        createContainerParameters.Cmd = command ?? new List<string>() { string.Empty };
+        createContainerParameters.Cmd = command;
 
         // 环境变量配置
         createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);

@@ -152,14 +152,12 @@ public sealed partial class DockerService
             // 容器内的挂载点声明
             Volumes = new Dictionary<string, EmptyStruct>(),
             // 标签
-            Labels = labelsVariables
+            Labels = labelsVariables,
+            // 命令
+            Cmd = command,
+            // 环境变量配置
+            Env = ProcessEnvironmentVariables(environmentVariables),
         };
-
-        // 命令
-        createContainerParameters.Cmd = command;
-
-        // 环境变量配置
-        createContainerParameters.Env = ProcessEnvironmentVariables(environmentVariables);
 
         // 网络
         if (networkConfig != null)
@@ -257,7 +255,8 @@ public sealed partial class DockerService
     {
         try
         {
-            using var stream = await _dockerClient.Containers.GetContainerStatsAsync(containerId, new ContainerStatsParameters { Stream = false }, CancellationToken.None);
+            var containerStatsParameters = new ContainerStatsParameters { Stream = false };
+            await using var stream = await _dockerClient.Containers.GetContainerStatsAsync(containerId, containerStatsParameters, CancellationToken.None);
 
             using var reader = new StreamReader(stream);
             var content = await reader.ReadToEndAsync();
@@ -280,22 +279,14 @@ public sealed partial class DockerService
     {
         try
         {
-            if (string.IsNullOrEmpty(containerId))
-            {
-                throw new ArgumentException("Container ID cannot be empty", nameof(containerId));
-            }
+            ArgumentException.ThrowIfNullOrEmpty(containerId, nameof(containerId));
+            ArgumentException.ThrowIfNullOrEmpty(newName, nameof(newName));
 
-            if (string.IsNullOrEmpty(newName))
+            var containerRenameParameters = new ContainerRenameParameters
             {
-                throw new ArgumentException("New name cannot be empty", nameof(newName));
-            }
-
-            await _dockerClient.Containers.RenameContainerAsync(
-                containerId,
-                new ContainerRenameParameters
-                {
-                    NewName = newName
-                }, CancellationToken.None);
+                NewName = newName
+            };
+            await _dockerClient.Containers.RenameContainerAsync(containerId, containerRenameParameters, CancellationToken.None);
         }
         catch (DockerContainerNotFoundException)
         {

@@ -13,8 +13,8 @@ public sealed partial class DockerService
     /// <response code="500">服务器错误</response>
     public async Task<IList<ImagesListResponse>> GetImagesAsync()
     {
-        return await _dockerClient.Images.ListImagesAsync(
-                   new ImagesListParameters { All = true });
+        var imagesListParameters = new ImagesListParameters { All = true };
+        return await _dockerClient.Images.ListImagesAsync(imagesListParameters);
     }
 
     /// <summary>
@@ -53,11 +53,10 @@ public sealed partial class DockerService
     /// <param name="force">是否强制删除</param>
     public async Task RemoveImageAsync(string imageId, bool force = false)
     {
-        await _dockerClient.Images.DeleteImageAsync(
-            imageId,
-            new ImageDeleteParameters
-            {
-                Force = force
-            });
+        var imageDeleteParameters = new ImageDeleteParameters
+        {
+            Force = force
+        };
+        await _dockerClient.Images.DeleteImageAsync(imageId, imageDeleteParameters);
     }
 }

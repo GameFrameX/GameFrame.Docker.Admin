@@ -142,7 +142,7 @@ public sealed partial class DockerService
                 PortBindings = new Dictionary<string, IList<PortBinding>>(),
                 Binds = new List<string>(),
                 // 重启策略：除非手动停止，否则一直重启, 最大重试次数10次
-                RestartPolicy = new RestartPolicy() { Name = RestartPolicyKind.UnlessStopped, MaximumRetryCount = 10 },
+                RestartPolicy = new RestartPolicy() { Name = RestartPolicyKind.UnlessStopped },
                 NetworkMode = "bridge" // 显式设置网络模式为bridge，确保端口映射正常工作
             },
             // 暴露端口

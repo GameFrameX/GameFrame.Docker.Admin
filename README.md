@@ -1,6 +1,6 @@
 # Docker 管理服务
 
-基于 .NET 8.0 开发的 Docker 容器管理服务，提供 REST API 接口。
+基于 .NET 10.0 开发的 Docker 容器管理服务，提供 REST API 接口。
 
 ## 功能特点
 
@@ -13,7 +13,7 @@
 
 - Docker Engine
 - Docker Compose
-- .NET 8.0 运行时 (本地开发需要)
+- .NET 10.0 运行时 (本地开发需要)
 
 ## 配置说明
 
@@ -40,7 +40,7 @@
 
 ### Dockerfile 说明
 
-- 基于 .NET 8.0 官方镜像构建
+- 基于 .NET 10.0 官方镜像构建
 - 包含健康检查机制（每30秒检查一次）
 - 已配置必要的 Docker 访问权限
 - 支持多阶段构建，优化镜像大小
@@ -62,7 +62,7 @@
 
 ## 技术栈
 
-- .NET 8.0
+- .NET 10.0
 - Docker API
 - RESTful API
 - Docker Compose

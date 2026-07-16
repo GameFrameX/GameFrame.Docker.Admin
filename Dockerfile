@@ -1,6 +1,6 @@
 
-# 使用 .NET 8.0 SDK 作为构建镜像
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# 使用 .NET 10.0 SDK 作为构建镜像
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 # 设置构建配置为Release模式
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -20,7 +20,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Docker.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # 最终阶段：使用运行时镜像
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 # 从发布阶段复制编译好的文件
 COPY --from=publish /app/publish .
@@ -43,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=3s \
 ENTRYPOINT ["dotnet", "Docker.Admin.dll"]
 
 # 挂载 Docker socket，用于与Docker守护进程通信
-VOLUME /var/run/docker.sock 
+VOLUME /var/run/docker.sock

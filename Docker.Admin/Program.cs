@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using System.Reflection;
 using Docker.Admin.Filter;
 using GameFrameX.Foundation.Logger;

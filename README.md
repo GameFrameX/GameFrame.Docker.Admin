@@ -26,6 +26,18 @@
 - 网络模式：bridge
 - 关键挂载：docker.sock 用于与 Docker 守护进程通信
 
+### 镜像拉取前磁盘保护
+
+服务在拉取镜像前会检查可用磁盘空间。空间低于阈值时，会清理未被任何容器引用的旧镜像；清理顺序按镜像创建时间从旧到新执行，并保留同仓库最近的镜像用于回滚。
+
+可用环境变量：
+
+- `DOCKER_ADMIN_IMAGE_CLEANUP_ENABLED`：是否启用自动清理，默认 `true`
+- `DOCKER_ADMIN_MIN_FREE_SPACE_BYTES`：拉取镜像前要求的最小可用空间，默认 `2147483648`（2 GB）
+- `DOCKER_ADMIN_KEEP_RECENT_IMAGES`：每个镜像仓库保留的最近镜像数量，默认 `3`
+- `DOCKER_ADMIN_PROTECTED_IMAGE_TAGS`：永不自动清理的完整镜像标签，多个值用英文逗号分隔
+- `DOCKER_ADMIN_DOCKER_DISK_PATH`：用于检测磁盘空间的 Docker 数据目录路径；容器内无法访问宿主机 Docker 数据目录时，建议挂载该目录并显式配置此变量
+
 ### Dockerfile 说明
 
 - 基于 .NET 8.0 官方镜像构建
@@ -54,4 +66,3 @@
 - Docker API
 - RESTful API
 - Docker Compose
-

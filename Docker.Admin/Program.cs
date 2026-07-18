@@ -7,12 +7,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
+LogOptions.Default.LogType = "DockerAdmin";
 var logger = LogHandler.Create(LogOptions.Default);
 
 builder.Host.UseSerilog(logger);
 
 // 添加 MVC 服务
 builder.Services.AddControllers(option => { FilterApp.Init(option.Filters); });
+builder.Services.AddHealthChecks();
 
 // 只在开发环境中添加 Swagger 服务
 if (builder.Environment.IsDevelopment())
@@ -49,6 +51,7 @@ if (app.Environment.IsDevelopment())
 
 // 添加路由中间件
 app.UseRouting();
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

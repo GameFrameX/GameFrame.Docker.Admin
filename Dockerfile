@@ -37,7 +37,7 @@ EXPOSE 8080
 
 # 添加健康检查：每30秒检查一次，超时时间3秒
 HEALTHCHECK --interval=30s --timeout=3s \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://127.0.0.1:8080/health || exit 1
 
 # 设置入口点：运行 .NET 应用
 ENTRYPOINT ["dotnet", "Docker.Admin.dll"]

@@ -29,17 +29,17 @@ public sealed partial class DockerService
     /// <response code="500">服务器错误</response>
     public async Task<string> GetContainerLogsAsync(string containerId)
     {
-        var logStream = await _dockerClient.Containers.GetContainerLogsAsync(
-                            containerId,
-                            new ContainerLogsParameters
-                            {
-                                ShowStdout = true,
-                                ShowStderr = true,
-                                Tail = "100"
-                            });
+        using var logStream = await _dockerClient.Containers.GetContainerLogsAsync(
+                                  containerId,
+                                  new ContainerLogsParameters
+                                  {
+                                      ShowStdout = true,
+                                      ShowStderr = true,
+                                      Tail = "100"
+                                  });
 
-        using var reader = new StreamReader(logStream);
-        return await reader.ReadToEndAsync();
+        var (stdout, stderr) = await logStream.ReadOutputToEndAsync(CancellationToken.None);
+        return stdout + stderr;
     }
 
     /// <summary>
@@ -74,14 +74,16 @@ public sealed partial class DockerService
     {
         try
         {
-            using var stream = await _dockerClient.Containers.GetContainerStatsAsync(
-                                   containerId,
-                                   new ContainerStatsParameters { Stream = false },
-                                   default);
+            ContainerStatsResponse result = null;
+            var progress = new Progress<ContainerStatsResponse>(stats => result = stats);
 
-            using var reader = new StreamReader(stream);
-            var content = await reader.ReadToEndAsync();
-            return System.Text.Json.JsonSerializer.Deserialize<ContainerStatsResponse>(content);
+            await _dockerClient.Containers.GetContainerStatsAsync(
+                containerId,
+                new ContainerStatsParameters { Stream = false },
+                progress,
+                CancellationToken.None);
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -148,7 +150,7 @@ public sealed partial class DockerService
             // 暴露端口
             ExposedPorts = new Dictionary<string, EmptyStruct>(),
             // 健康检查
-            Healthcheck = new HealthConfig(),
+            Healthcheck = new HealthcheckConfig(),
             // 网络
             NetworkingConfig = new NetworkingConfig(),
             // 容器内的挂载点声明
@@ -257,12 +259,16 @@ public sealed partial class DockerService
     {
         try
         {
-            var containerStatsParameters = new ContainerStatsParameters { Stream = false };
-            await using var stream = await _dockerClient.Containers.GetContainerStatsAsync(containerId, containerStatsParameters, CancellationToken.None);
+            ContainerStatsResponse result = null;
+            var progress = new Progress<ContainerStatsResponse>(stats => result = stats);
 
-            using var reader = new StreamReader(stream);
-            var content = await reader.ReadToEndAsync();
-            return System.Text.Json.JsonSerializer.Deserialize<ContainerStatsResponse>(content);
+            await _dockerClient.Containers.GetContainerStatsAsync(
+                containerId,
+                new ContainerStatsParameters { Stream = false },
+                progress,
+                CancellationToken.None);
+
+            return result;
         }
         catch (Exception ex)
         {

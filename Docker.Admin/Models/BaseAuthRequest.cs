@@ -19,9 +19,4 @@ public sealed class BaseAuthRequest
     /// 可选的密码，用于身份验证以访问私有镜像仓库
     /// </summary>
     public string Password { get; set; }
-
-    /// <summary>
-    /// 可选的邮件地址，用于身份验证以访问私有镜像仓库
-    /// </summary>
-    public string Email { get; set; }
 }

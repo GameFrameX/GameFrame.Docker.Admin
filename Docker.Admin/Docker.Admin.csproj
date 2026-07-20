@@ -14,7 +14,7 @@
         <PackageReference Include="GameFrameX.Foundation.Http.Normalization" Version="2.7.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
-        <PackageReference Include="Docker.DotNet" Version="3.125.15" />
-        <PackageReference Include="Docker.DotNet.X509" Version="3.125.15" />
+        <PackageReference Include="Docker.DotNet.Enhanced" Version="4.3.3" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 </Project>

@@ -18,6 +18,9 @@ public sealed partial class DockerService
         var uri = (Environment.OSVersion.Platform == PlatformID.Win32NT || Environment.OSVersion.Platform == PlatformID.Win32S || Environment.OSVersion.Platform == PlatformID.WinCE || Environment.OSVersion.Platform == PlatformID.Win32Windows)
                       ? new Uri("npipe://./pipe/docker_engine") // Windows
                       : new Uri("unix:///var/run/docker.sock"); // Linux
-        _dockerClient = new DockerClientConfiguration(uri).CreateClient(new System.Version(1, 47));
+        _dockerClient = new DockerClientBuilder()
+                            .WithEndpoint(uri)
+                            .WithApiVersion(new System.Version(1, 47))
+                            .Build();
     }
 }

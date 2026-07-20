@@ -70,7 +70,7 @@ public sealed partial class DockerService
     {
         if (auth != null)
         {
-            var authConfig = new AuthConfig { Username = auth.Username, Password = auth.Password, ServerAddress = auth.Registry, Email = auth.Email, };
+            var authConfig = new AuthConfig { Username = auth.Username, Password = auth.Password, ServerAddress = auth.Registry, };
             await _dockerClient.Images.CreateImageAsync(imagesCreateParameters, authConfig, new Progress<JSONMessage>());
         }
         else

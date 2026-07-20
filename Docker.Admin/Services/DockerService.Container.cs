@@ -29,17 +29,18 @@ public sealed partial class DockerService
     /// <response code="500">服务器错误</response>
     public async Task<string> GetContainerLogsAsync(string containerId)
     {
-        using var logStream = await _dockerClient.Containers.GetContainerLogsAsync(
+        using (var logStream = await _dockerClient.Containers.GetContainerLogsAsync(
                                   containerId,
                                   new ContainerLogsParameters
                                   {
                                       ShowStdout = true,
                                       ShowStderr = true,
                                       Tail = "100"
-                                  });
-
-        var (stdout, stderr) = await logStream.ReadOutputToEndAsync(CancellationToken.None);
-        return stdout + stderr;
+                                  }))
+        {
+            var (stdout, stderr) = await logStream.ReadOutputToEndAsync(CancellationToken.None);
+            return stdout + stderr;
+        }
     }
 
     /// <summary>

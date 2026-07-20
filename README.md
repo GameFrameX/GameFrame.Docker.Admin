@@ -151,6 +151,38 @@ GameFrame.Docker.Admin/
 - 已配置必要的 Docker 访问权限
 - 支持多阶段构建，优化镜像大小
 
+### 接口鉴权
+
+服务支持基于 API Key 的接口鉴权，防止未授权调用。配置后，除健康检查外所有接口都需要在请求头携带密钥。
+
+> ⚠️ **必须配合 HTTPS 使用**：API Key 通过请求头明文传输，公网部署需由反向代理（Caddy/Nginx 等）或 Kestrel 证书终止 TLS，否则密钥会被中间人嗅探。仅启用 API Key 而不启用 HTTPS，在公网环境下不能视为安全。
+
+可用环境变量：
+
+- `DOCKER_ADMIN_API_KEY`：API 密钥。**未配置时鉴权关闭**，所有接口可匿名访问（仅适合内网或开发环境）
+
+启用后，请求需携带请求头：
+
+```
+Authorization: Bearer <DOCKER_ADMIN_API_KEY>
+```
+
+调用示例：
+
+```bash
+curl -H "Authorization: Bearer $DOCKER_ADMIN_API_KEY" \
+     -H "Content-Type: application/json" \
+     -X POST http://your-host:20900/api/containers/start \
+     -d '{"id":"abc123"}'
+```
+
+补充说明：
+
+- 健康检查端点 `/health` 不受鉴权限制，Dockerfile 中的 `HEALTHCHECK` 无需携带密钥
+- 启动时若未配置密钥，服务会输出 WARNING 日志提醒
+- 密钥轮换：更新环境变量后重启服务即可
+- CI/CD 场景下，密钥应存放在 CI/CD 的 Secrets 中通过环境变量注入，不要明文写入流水线配置
+
 ## 部署方法
 
 1. 确保服务器已安装 Docker 和 Docker Compose

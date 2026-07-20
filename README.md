@@ -9,6 +9,112 @@
 - 安全的 Docker socket 访问
 - 容器化部署方案
 
+## 技术架构
+
+### 整体设计
+
+服务采用经典三层结构，对外通过 HTTP API 暴露能力，内部经 `Docker.DotNet` 客户端直接与本地 Docker 守护进程通信。Docker 端点按平台自动选择：Linux 下走 `unix:///var/run/docker.sock`，Windows 下走 `npipe://./pipe/docker_engine`，Docker Engine API 协议版本固定为 `v1.47`。
+
+```
+┌────────────────────────────────────────────────────┐
+│            客户端 / 上游服务 (HTTP)                 │
+└──────────────────────┬─────────────────────────────┘
+                       │ REST API (容器内 8080，宿主机 20900)
+┌──────────────────────▼─────────────────────────────┐
+│   ASP.NET Core MVC (Program.cs 装配管线)             │
+│   ├─ Filter：请求/响应统一日志、HttpJsonResult 封装 │
+│   └─ Controllers：Containers / Image / NetWork     │
+└──────────────────────┬─────────────────────────────┘
+                       │ 依赖注入（DockerService 单例）
+┌──────────────────────▼─────────────────────────────┐
+│        Services：DockerService (partial class)      │
+│   按领域拆分为 Container / Image / Network 三部分   │
+│   + DockerImageCleanupPlanner（纯算法，便于测试）   │
+└──────────────────────┬─────────────────────────────┘
+                       │ Docker Engine API v1.47
+┌──────────────────────▼─────────────────────────────┐
+│      Docker.DotNet → docker.sock / npipe            │
+└────────────────────────────────────────────────────┘
+```
+
+### 分层职责
+
+| 层 | 位置 | 职责 |
+|---|---|---|
+| 入口与装配 | `Program.cs` | Serilog 日志、MVC、健康检查 `/health`、Swagger（仅开发环境）、`DockerService` 单例注册 |
+| 控制器层 | `Controllers/` | 接收请求、异常兜底、统一包装 `HttpJsonResult`；不承载业务逻辑 |
+| 服务层 | `Services/` | 封装 Docker 操作；`DockerService` 以 `partial` 形式按领域拆分到三个文件 |
+| 算法层 | `Services/DockerImageCleanupPlanner.cs` | 镜像清理候选选择，纯函数、无副作用，便于单元测试 |
+| 过滤器 | `Filter/` | 全局请求日志、响应日志（统一响应格式由 `HttpJsonResult` 承载） |
+| 数据契约 | `Models/` | 请求/响应 DTO，按 `Container` / `Image` / `Network` 子目录组织 |
+
+### 关键技术选型
+
+- **运行时**：.NET 10.0，`LangVersion` 10，`ImplicitUsings` 开启，`Nullable` 关闭
+- **Web 框架**：ASP.NET Core MVC（`AddControllers` + `[ApiController]`），非 Minimal API、非 Furion
+- **Docker 客户端**：`Docker.DotNet` 3.125.15 + `Docker.DotNet.X509`，按平台自动选择 socket 端点
+- **统一响应**：`GameFrameX.Foundation.Http.Normalization.HttpJsonResult`，所有接口统一返回该结构
+- **日志**：Serilog（`Serilog.AspNetCore`）经 `GameFrameX.Foundation.Logger.LogHandler` 创建，`LogType = "DockerAdmin"`
+- **API 文档**：Swashbuckle Swagger，仅 `Development` 环境启用，并加载 XML 注释（`GenerateDocumentationFile` 已开启）
+- **JSON 序列化**：Newtonsoft.Json（通过 `GameFrameX.Foundation.Json` 封装）
+
+### API 路由约定
+
+控制器基类统一标注 `[Route("api/[controller]/[action]")]`，路由前缀由控制器类名（去掉 `Controller` 后缀）决定，方法名即 action（ASP.NET Core 路由匹配大小写不敏感）：
+
+| 控制器 | 路由前缀 |
+|---|---|
+| `ContainersController` | `/api/containers` |
+| `ImageController` | `/api/image` |
+| `NetWorkController` | `/api/netWork` |
+
+示例：`GET /api/containers/getList`、`POST /api/containers/start`、`POST /api/image/pull`、`POST /api/netWork/create`。
+
+## 目录结构
+
+```
+GameFrame.Docker.Admin/
+├── Docker.Admin/                        # 主服务项目
+│   ├── Program.cs                       # 应用入口：日志、MVC、健康检查、Swagger、DI 装配
+│   ├── BaseController.cs                # 控制器基类：统一路由 [api/[controller]/[action]]、注入 DockerService
+│   ├── GlobalUsing.cs                   # 全局 using 引用
+│   ├── Docker.Admin.csproj              # 项目文件与 NuGet 依赖
+│   ├── Controllers/                     # HTTP 入口
+│   │   ├── ContainersController.cs      # 容器：列表/启停/创建/删除/日志/统计/重命名等
+│   │   ├── ImageController.cs           # 镜像：列表/拉取/删除
+│   │   └── NetWorkController.cs         # 网络：列表/查询/创建/删除
+│   ├── Services/                        # 业务封装层
+│   │   ├── DockerService.cs             # partial 主类：DockerClient 初始化与端点选择
+│   │   ├── DockerService.Container.cs   # 容器领域操作
+│   │   ├── DockerService.Image.cs       # 镜像领域操作（含拉取前磁盘清理）
+│   │   ├── DockerService.Network.cs     # 网络领域操作
+│   │   └── DockerImageCleanupPlanner.cs # 镜像清理候选选择（纯算法，可单测）
+│   ├── Filter/                          # MVC 过滤器
+│   │   ├── FilterApp.cs                 # 过滤器统一注册入口
+│   │   ├── GlobalRequestHandlerFilter.cs# 全局请求日志
+│   │   └── GlobalResponseHandlerFilter.cs# 全局响应日志
+│   ├── Models/                          # 请求/响应 DTO
+│   │   ├── BaseRequest.cs               # Id 基类请求（镜像/容器/网络通用）
+│   │   ├── BaseDeleteRequest.cs         # 含 IsForce 的删除请求
+│   │   ├── BaseAuthRequest.cs           # 私有仓库认证信息（Registry/Username/Password/Email）
+│   │   ├── Container/                   # 容器相关请求模型
+│   │   ├── Image/                       # 镜像相关请求模型
+│   │   └── Network/                     # 网络相关请求模型
+│   └── Properties/
+│       ├── AssemblyInfo.cs
+│       └── launchSettings.json
+├── Docker.Admin.Tests/                  # 单元测试项目（引用 Docker.Admin）
+│   ├── Docker.Admin.Tests.csproj
+│   └── Program.cs                       # 测试入口（镜像清理算法等）
+├── Server.Docker.Admin.slnx             # 解决方案文件（.slnx 格式）
+├── Dockerfile                           # 多阶段构建脚本
+├── docker-compose.yml                   # 编排配置：端口、挂载、网络
+├── .dockerignore
+├── .gitignore
+├── .github/workflows/                   # CI：contributors-readme、仓库同步
+└── README.md
+```
+
 ## 环境要求
 
 - Docker Engine

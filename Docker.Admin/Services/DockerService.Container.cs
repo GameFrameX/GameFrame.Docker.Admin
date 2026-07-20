@@ -75,7 +75,7 @@ public sealed partial class DockerService
         try
         {
             ContainerStatsResponse result = null;
-            var progress = new Progress<ContainerStatsResponse>(stats => result = stats);
+            var progress = new SyncProgress<ContainerStatsResponse>(stats => result = stats);
 
             await _dockerClient.Containers.GetContainerStatsAsync(
                 containerId,
@@ -260,7 +260,7 @@ public sealed partial class DockerService
         try
         {
             ContainerStatsResponse result = null;
-            var progress = new Progress<ContainerStatsResponse>(stats => result = stats);
+            var progress = new SyncProgress<ContainerStatsResponse>(stats => result = stats);
 
             await _dockerClient.Containers.GetContainerStatsAsync(
                 containerId,
@@ -431,5 +431,24 @@ public sealed partial class DockerService
         }
 
         return envList;
+    }
+
+    /// <summary>
+    /// 同步执行的 IProgress 实现，Report 在调用栈上立即执行回调，
+    /// 避免依赖 Progress&lt;T&gt; 的 SynchronizationContext 派发时序。
+    /// </summary>
+    private sealed class SyncProgress<T> : IProgress<T>
+    {
+        private readonly Action<T> _callback;
+
+        public SyncProgress(Action<T> callback)
+        {
+            _callback = callback;
+        }
+
+        public void Report(T value)
+        {
+            _callback(value);
+        }
     }
 }

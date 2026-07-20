@@ -7,7 +7,6 @@
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Controllers;
 global using Microsoft.AspNetCore.Mvc.Filters;
-global using Newtonsoft.Json;
 global using Serilog;
 global using GameFrameX.Foundation.Json;
 global using Docker.Admin.Models;

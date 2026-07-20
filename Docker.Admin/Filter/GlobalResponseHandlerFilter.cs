@@ -23,7 +23,7 @@ public sealed class GlobalResponseHandlerFilter : IActionFilter
         if (context.Result is ObjectResult objectResult)
         {
             var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
-            LogHelper.Info($"resp ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonConvert.SerializeObject(objectResult.Value)}");
+            LogHelper.Info($"resp ==> {controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName} {context.ActionDescriptor.Id}: {JsonHelper.Serialize(objectResult.Value)}");
         }
     }
 

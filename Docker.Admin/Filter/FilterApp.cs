@@ -11,6 +11,8 @@ public static class FilterApp
     /// <param name="filterCollection"></param>
     public static void Init(FilterCollection filterCollection)
     {
+        // API Key 鉴权
+        filterCollection.Add<ApiKeyAuthFilter>();
         filterCollection.Add<GlobalRequestHandlerFilter>();
         // 异常
         // filterCollection.Add<GlobalExceptionHandlerFilter>();

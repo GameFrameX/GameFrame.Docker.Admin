@@ -5,6 +5,9 @@
     ports:
       - "20900:8080"  # 将容器内的8080端口映射到主机的20900端口
     restart: always  # 设置容器重启策略
+    environment:
+      # API 鉴权密钥；未设置则鉴权关闭。从宿主机环境变量或 .env 文件读取，避免写入仓库
+      - DOCKER_ADMIN_API_KEY=${DOCKER_ADMIN_API_KEY:-}
     networks: # 可选：定义一个网络
       - gameframex-network  # 可以自定义网络名称
     volumes:

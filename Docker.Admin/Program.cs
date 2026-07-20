@@ -43,6 +43,11 @@ builder.Services.AddSingleton<DockerService>();
 
 var app = builder.Build();
 
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOCKER_ADMIN_API_KEY")))
+{
+    Log.Warning("未配置 DOCKER_ADMIN_API_KEY，接口鉴权未启用。公网部署存在安全风险。");
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
